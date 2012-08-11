@@ -1,0 +1,12 @@
+{application, erlhdf5,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { erlhdf5_app, []}},
+  {env, []}
+ ]}.
