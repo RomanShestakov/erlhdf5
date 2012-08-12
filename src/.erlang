@@ -1,0 +1,22 @@
+io:format("starting Erlang shell, executing .erlang ~n").
+Dir = filename:absname(".").
+io:format("current dir: ~p ~n", [Dir]).
+
+%% change to root
+c:cd("..").
+io:format("changed dir to: ~p ~n", [filename:absname(".")]).
+
+%% find all the dir names in "deps" folder
+Dirs = 
+     case filelib:is_dir("deps") of
+	 true ->
+	     Current = lists:delete(".",filename:split(filename:absname("."))),
+	     [filename:join(Current ++ [File] ++ ["ebin"]) || File <- filelib:wildcard("deps/*"), string:str(File, ".") =:= 0 ];
+	 false -> []
+     end.
+
+io:format("found dependencies: ~p ~n", [Dirs]).
+
+%%code:add_patha(".").
+code:add_patha("./ebin").
+[code:add_patha(Dir) || Dir <- Dirs].

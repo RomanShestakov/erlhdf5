@@ -7,6 +7,6 @@
                   kernel,
                   stdlib
                  ]},
-  {mod, { erlhdf5_app, []}},
+  {mod, { erlhdf5, []}},
   {env, []}
  ]}.
