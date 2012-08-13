@@ -17,3 +17,4 @@ src/ec_daytime_scanner.erl
 src/ec_parser.erl
 src/ec_scanner.erl
 rel/files/app.config
+/priv/erlhdf5_nif.so
