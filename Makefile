@@ -1,26 +1,16 @@
-all: compile
 
-compile:
-	@./rebar compile
+TEST_SUPPORT = \
+	test/etap.beam
 
-# perftest: compile
-# 	@cd perf && erlc erlzmq_perf.erl
+%.beam: %.erl
+	erlc -o test/ $<
+
+all:
+	./rebar compile
+
+check: $(TEST_SUPPORT)
+	prove test/*.t
 
 clean:
-	@./rebar clean
-
-# distclean: clean
-# 	@cd c_src;make distclean
-
-# test: compile
-# 	@./rebar eunit
-
-# docs:
-# 	@./rebar doc
-
-# bench: perftest
-# 	@echo 'Running benchmarks, this could take some time...'
-# 	@mkdir -p graphs
-# 	@./perf/perfgraphs.py
-# 	@mv -f *.png graphs/
-
+	./rebar clean
+	rm test/*.beam

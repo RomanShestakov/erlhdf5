@@ -5,30 +5,12 @@ ERLANG_HOME=/usr/local/lib/erlang
 HDF5_VERSION=1.8.9
 HDF5_FLAGS=
 
-all: $(DEPS)/hdf5/lib/libhdf5.la erlhdf5
-#erlhdf5_nif
-
-
-erlhdf5:
-	gcc -Wall \
-	-arch i386 -arch x86_64  \
-	-I$(ERLANG_HOME)/usr/include \
-	-fPIC \
-	-bundle -flat_namespace -undefined suppress  \
-	-o ../priv/erlhdf5_nif.so \
-	erlhdf5_nif.c
-
-$(DEPS)/hdf5/lib/libhdf5.la: $(DEPS)/hdf5
-	@cd $(DEPS)/hdf5-$(HDF5_VERSION) && ./configure --prefix $(CURDIR)/$(DEPS)/hdf5  \
-	$(HDF5_FLAGS) && make && make install
+all: $(DEPS)/hdf5/lib/libhdf5.la
 
 $(DEPS)/hdf5:
 	@mkdir -p $(DEPS); cd $(DEPS) ; \
 	curl http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-$(HDF5_VERSION).tar.gz | tar xzf -
 
-clean:
-	rebar clean
-	#rm -rf test/*.beam
-	rm -rf priv/*.so
-	rm -rf $(DEPS)/hdf5-$(HDF5_VERSION)
-	rm -rf $(DEPS)/hdf5
+$(DEPS)/hdf5/lib/libhdf5.la: $(DEPS)/hdf5
+	@cd $(DEPS)/hdf5-$(HDF5_VERSION) && ./configure --prefix $(CURDIR)/$(DEPS)/hdf5  \
+	$(HDF5_FLAGS) && make && make install
