@@ -2,8 +2,9 @@ LINUX=$(shell uname | grep Linux | wc -l | xargs echo)
 DEPS=../deps
 
 ERLANG_HOME=/usr/local/lib/erlang
-HDF5_VERSION=1.8.9
 HDF5_FLAGS=
+
+HDF5_VERSION := $(shell curl http://www.hdfgroup.org/ftp/HDF5/current/src/ | grep '<title>.*</title>' | awk '{print $$2}')
 
 all: $(DEPS)/hdf5/lib/libhdf5.la
 

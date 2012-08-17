@@ -13,4 +13,4 @@ check: $(TEST_SUPPORT)
 
 clean:
 	./rebar clean
-	rm test/*.beam
+	#	rm test/*.beam
