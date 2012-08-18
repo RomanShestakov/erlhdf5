@@ -157,4 +157,4 @@ static ErlNifFunc nif_funcs[] =
 /*     return 0; */
 /* }; */
 
-ERL_NIF_INIT(erlhdf5_nif, nif_funcs, &load, NULL, NULL, NULL);
+ERL_NIF_INIT(erlhdf5, nif_funcs, &load, NULL, NULL, NULL);

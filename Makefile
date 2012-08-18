@@ -8,9 +8,14 @@ TEST_SUPPORT = \
 all:
 	./rebar compile
 
-check: $(TEST_SUPPORT)
-	prove test/*.t
+# check: $(TEST_SUPPORT)
+# 	prove test/*.t
 
 clean:
-	./rebar clean
-	#	rm test/*.beam
+	rebar clean
+	rm -rf test/*.beam
+
+test: all
+	mkdir -p .eunit
+	cp -r priv .eunit/.
+	./rebar skip_deps=true eunit
