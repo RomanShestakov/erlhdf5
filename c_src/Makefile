@@ -9,7 +9,7 @@ HDF5_VERSION := $(shell curl http://www.hdfgroup.org/ftp/HDF5/current/src/ | gre
 all: $(DEPS)/hdf5/lib/libhdf5.la
 
 $(DEPS)/hdf5:
-	@mkdir -p $(DEPS); cd $(DEPS) ; \
+	@mkdir $(DEPS); cd $(DEPS) ; \
 	curl http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-$(HDF5_VERSION).tar.gz | tar xzf -
 
 $(DEPS)/hdf5/lib/libhdf5.la: $(DEPS)/hdf5
