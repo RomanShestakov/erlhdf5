@@ -3,28 +3,13 @@
 #include <stdlib.h>
 #include "erl_nif.h"
 #include "dbg.h"
+#include "erlhdf5.h"
 
 ErlNifResourceType* RES_TYPE;
 
-#define ATOM(Id, Value) { Id = enif_make_atom(env, Value); }
-
 #define MAXBUFLEN       1024
 
-// Atoms (initialized in on_load)
-static ERL_NIF_TERM ATOM_TRUE;
-static ERL_NIF_TERM ATOM_FALSE;
-static ERL_NIF_TERM ATOM_OK;
-static ERL_NIF_TERM ATOM_ERROR;
 /* // http://calymirror.appspot.com/github.com/boundary/eleveldb/blob/master/c_src/eleveldb.cc */
-
-typedef struct
-{
-  hid_t* file_id;
-} FileHandle;
-
-
-static unsigned _convert_file_access_flag(char*);
-
 
 void free_res(ErlNifEnv* env, void* obj)
 {
@@ -39,7 +24,7 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM load_info)
     int flags = ERL_NIF_RT_CREATE | ERL_NIF_RT_TAKEOVER;
 
     RES_TYPE = enif_open_resource_type(env, mod, name, free_res, flags, NULL);
-    if(RES_TYPE == NULL) return -1;
+    check(RES_TYPE, "Failed to open resource type %s", name);
 
     // Initialize common atoms
     ATOM(ATOM_OK, "ok");
@@ -48,6 +33,9 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM load_info)
     ATOM(ATOM_FALSE, "false");
 
     return 0;
+
+ error:
+    return -1;
 };
 
 // func to convert error message
@@ -73,16 +61,17 @@ static ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
 	"Can't get file_access_flag from argv");
 
   // convert access flag to format which hdf5 api understand
-  access_flag = _convert_file_access_flag(file_access_flag);
-  check(access_flag, "Failed to convert access flag");
+  check(_convert_file_access_flag(file_access_flag, &access_flag) == 0, "Failed to convert access flag");
 
   // create a new file using default properties
   file_id = H5Fcreate(file_name, access_flag, H5P_DEFAULT, H5P_DEFAULT);
   check(file_id > 0, "Failed to create %s.", file_name);
 
-  //setup handle
+  // create a resource to pass reference to file_id back to erlang
   res = enif_alloc_resource(RES_TYPE, sizeof(FileHandle));
   check(res, "Failed to allocate resource for type %s", "FileHandle");
+
+  // add ref to resource
   res->file_id = &file_id;
   ret = enif_make_resource(env, res);
   enif_release_resource(res);
@@ -93,15 +82,16 @@ static ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
   return error_tuple(env, "Can not create file");
 };
 
-
-static unsigned _convert_file_access_flag(char* flag)
+static int _convert_file_access_flag(char* flag, unsigned *access_flag)
 {
   if(strncmp(flag, "true", MAXBUFLEN) == 0)
-    return H5F_ACC_TRUNC;
+      *access_flag = H5F_ACC_TRUNC;
   else if(strncmp(flag, "false", MAXBUFLEN) == 0)
-    return H5F_ACC_EXCL;
+    *access_flag = H5F_ACC_EXCL;
   else
     sentinel("Unknown file access flag %s", flag);
+
+  return 0;
 
  error:
   return -1;
