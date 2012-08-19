@@ -4,5 +4,5 @@
 
 hdf5_test_() ->
     [
-     ?_assertMatch({ok, _}, erlhdf5:h5fcreate())
+     ?_assertMatch({ok, _}, erlhdf5:h5fcreate("test_file_hdf5.h5"))
     ].
