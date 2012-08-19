@@ -1,3 +1,4 @@
+// http://c.learncodethehardway.org/book/learn-c-the-hard-waych21.html
 #ifndef __dbg_h__
 #define __dbg_h__
 
