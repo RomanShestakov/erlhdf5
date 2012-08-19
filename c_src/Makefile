@@ -15,3 +15,9 @@ $(DEPS)/hdf5:
 $(DEPS)/hdf5/lib/libhdf5.la: $(DEPS)/hdf5
 	@cd $(DEPS)/hdf5-$(HDF5_VERSION) && ./configure --prefix $(CURDIR)/$(DEPS)/hdf5  \
 	$(HDF5_FLAGS) && make && make install
+
+# etags:
+# 	cd /path/to/my/project
+#   	find . | grep ".*\.\(hh\|hxx\|cc\)" | xargs etags -f TAGS
+# 	# (find $(DEPS)/hdf5/src -name "*.h"; $(DEPS)/hdf5/src -name "*.c") > FILES
+# 	# cat FILES | etags -

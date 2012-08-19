@@ -11,6 +11,9 @@ all:
 # check: $(TEST_SUPPORT)
 # 	prove test/*.t
 
+etags:
+	find . | grep ".*\.\(h\|hxx\|c\)" | xargs etags -f TAGS
+
 clean:
 	rebar clean
 	rm -rf test/*.beam
