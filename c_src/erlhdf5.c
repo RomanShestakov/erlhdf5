@@ -17,7 +17,7 @@ static ERL_NIF_TERM ATOM_OK;
 static ERL_NIF_TERM ATOM_ERROR;
 
 // prototype
-static int _convert_file_access_flag(char* allow_truncate , unsigned *file_access_mode);
+static int _convert_flag(char* file_access_flags, unsigned *flags);
 
 typedef struct
 {
@@ -60,27 +60,28 @@ ERL_NIF_TERM error_tuple(ErlNifEnv* env, char* reason)
     return enif_make_tuple2(env, ATOM_ERROR, why);
 }
 
+// create file
 static ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   hid_t file_id;
   FileHandle* res;
   ERL_NIF_TERM ret;
   char file_name[MAXBUFLEN];
-  char allow_truncate[MAXBUFLEN];
-  unsigned file_access_mode;
+  char file_access_flags[MAXBUFLEN];
+  unsigned flags;
 
   // parse arguments
   check(argc == 2, "Incorrent number of arguments");
   check(enif_get_string(env, argv[0], file_name, sizeof(file_name), ERL_NIF_LATIN1) != 0, \
 	"Can't get file name from argv");
-  check(enif_get_atom(env, argv[1], allow_truncate, sizeof(allow_truncate), ERL_NIF_LATIN1) != 0, \
+  check(enif_get_atom(env, argv[1], file_access_flags, sizeof(file_access_flags), ERL_NIF_LATIN1) != 0, \
 	"Can't get file_access_flag from argv");
 
   // convert access flag to format which hdf5 api understand
-  check(_convert_file_access_flag(allow_truncate, &file_access_mode) == 0, "Failed to convert access flag");
+  check(_convert_flag(file_access_flags, &flags) == 0, "Failed to convert access flag");
 
   // create a new file using default properties
-  file_id = H5Fcreate(file_name, file_access_mode, H5P_DEFAULT, H5P_DEFAULT);
+  file_id = H5Fcreate(file_name, flags, H5P_DEFAULT, H5P_DEFAULT);
   check(file_id > 0, "Failed to create %s.", file_name);
 
   // create a resource to pass reference to file_id back to erlang
@@ -98,14 +99,58 @@ static ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
   return error_tuple(env, "Can not create file");
 };
 
-static int _convert_file_access_flag(char* allow_truncate , unsigned *file_access_mode)
+/* // open file */
+/* static ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) */
+/* { */
+/*   hid_t file_id; */
+/*   FileHandle* res; */
+/*   ERL_NIF_TERM ret; */
+/*   char file_name[MAXBUFLEN]; */
+/*   char allow_truncate[MAXBUFLEN]; */
+/*   unsigned file_access_mode; */
+
+/*   // parse arguments */
+/*   check(argc == 2, "Incorrent number of arguments"); */
+/*   check(enif_get_string(env, argv[0], file_name, sizeof(file_name), ERL_NIF_LATIN1) != 0, \ */
+/* 	"Can't get file name from argv"); */
+/*   check(enif_get_atom(env, argv[1], allow_truncate, sizeof(allow_truncate), ERL_NIF_LATIN1) != 0, \ */
+/* 	"Can't get file_access_flag from argv"); */
+
+/*   // convert access flag to format which hdf5 api understand */
+/*   check(_convert_file_access_flag(allow_truncate, &file_access_mode) == 0, "Failed to convert access flag"); */
+
+/*   // create a new file using default properties */
+/*   file_id = H5Fcreate(file_name, file_access_mode, H5P_DEFAULT, H5P_DEFAULT); */
+/*   check(file_id > 0, "Failed to create %s.", file_name); */
+
+/*   // create a resource to pass reference to file_id back to erlang */
+/*   res = enif_alloc_resource(RES_TYPE, sizeof(FileHandle)); */
+/*   check(res, "Failed to allocate resource for type %s", "FileHandle"); */
+
+/*   // add ref to resource */
+/*   res->file_id = &file_id; */
+/*   ret = enif_make_resource(env, res); */
+/*   enif_release_resource(res); */
+/*   return enif_make_tuple2(env, ATOM_OK, ret); */
+
+/*  error: */
+/*   if(file_id) H5Fclose (file_id); */
+/*   return error_tuple(env, "Can not create file"); */
+/* }; */
+
+
+static int _convert_flag(char* file_access_flags, unsigned *flags)
 {
-  if(strncmp(allow_truncate, "true", MAXBUFLEN) == 0)
-      *file_access_mode = H5F_ACC_TRUNC;
-  else if(strncmp(allow_truncate, "false", MAXBUFLEN) == 0)
-    *file_access_mode = H5F_ACC_EXCL;
+  if(strncmp(file_access_flags, "H5F_ACC_TRUNC", MAXBUFLEN) == 0)
+      *flags = H5F_ACC_TRUNC;
+  else if(strncmp(file_access_flags, "H5F_ACC_EXCL", MAXBUFLEN) == 0)
+    *flags = H5F_ACC_EXCL;
+  else if(strncmp(file_access_flags, "H5F_ACC_RDWR", MAXBUFLEN) == 0)
+    *flags = H5F_ACC_RDWR;
+  else if(strncmp(file_access_flags, "H5F_ACC_RDONLY", MAXBUFLEN) == 0)
+    *flags = H5F_ACC_RDONLY;
   else
-    sentinel("Unknown file access flag %s", allow_truncate);
+    sentinel("Unknown file access flag %s", file_access_flags);
 
   return 0;
 

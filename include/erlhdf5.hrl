@@ -1,0 +1,4 @@
+-define('H5F_ACC_TRUNC', 'H5F_ACC_TRUNC').
+-define('H5F_ACC_EXCL', 'H5F_ACC_EXCL').
+-define('H5F_ACC_RDWR', 'H5F_ACC_RDWR').
+-define('H5F_ACC_RDONLY', 'H5F_ACC_RDONLY').

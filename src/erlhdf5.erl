@@ -1,6 +1,8 @@
 -module(erlhdf5).
 -export([h5fcreate/2]).
 
+-include("../include/erlhdf5.hrl").
+
 -on_load(init/0).
 
 init() ->
@@ -12,8 +14,8 @@ init() ->
 %% AccessMode flag : true - to truncate existing file
 %% @end
 %%--------------------------------------------------------------------
--spec h5fcreate(FileName::string(), Truncate::boolean()) -> {ok, binary()} | {error, atom()}.
-h5fcreate(_FileName, _Truncate) ->
+-spec h5fcreate(FileName::string(), Flag::atom()) -> {ok, binary()} | {error, atom()}.
+h5fcreate(_FileName, _Flag) ->
     nif_error(?LINE).
 
 nif_error(Line) ->
