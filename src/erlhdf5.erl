@@ -1,5 +1,5 @@
 -module(erlhdf5).
--export([h5fcreate/2, h5fopen/2]).
+-export([h5fcreate/2, h5fopen/2, h5fclose/1]).
 
 -include("../include/erlhdf5.hrl").
 
@@ -22,8 +22,17 @@ h5fcreate(_FileName, _Flag) ->
 %% open hdf5 file
 %% @end
 %%--------------------------------------------------------------------
--spec h5fopen(FileName::string(), Flag::atom()) -> {ok, binary()} | {error, atom()}.
+-spec h5fopen(FileName::string(), Flag::atom()) -> {ok, FileHandler::binary()} | {error, Reason::atom()}.
 h5fopen(_FileName, _Flag) ->
+    nif_error(?LINE).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% close hdf5 file
+%% @end
+%%--------------------------------------------------------------------
+-spec h5fclose(FileHandler::binary()) -> ok | {error, Reason::atom()}.
+h5fclose(_FileHandler) ->
     nif_error(?LINE).
 
 nif_error(Line) ->

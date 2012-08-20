@@ -21,7 +21,7 @@ static int _convert_flag(char* file_access_flags, unsigned *flags);
 
 typedef struct
 {
-  hid_t* file_id;
+  hid_t file_id;
 } FileHandle;
 
 /* // http://calymirror.appspot.com/github.com/boundary/eleveldb/blob/master/c_src/eleveldb.cc */
@@ -89,7 +89,7 @@ static ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
   check(res, "Failed to allocate resource for type %s", "FileHandle");
 
   // add ref to resource
-  res->file_id = &file_id;
+  res->file_id = file_id;
   ret = enif_make_resource(env, res);
   enif_release_resource(res);
   return enif_make_tuple2(env, ATOM_OK, ret);
@@ -128,7 +128,7 @@ static ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   check(res, "Failed to allocate resource for type %s", "FileHandle");
 
   // add ref to resource
-  res->file_id = &file_id;
+  res->file_id = file_id;
   ret = enif_make_resource(env, res);
   enif_release_resource(res);
   return enif_make_tuple2(env, ATOM_OK, ret);
@@ -137,6 +137,48 @@ static ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   if(file_id) H5Fclose (file_id);
   return error_tuple(env, "Can not open file");
 };
+
+
+/* static ERL_NIF_TERM */
+/* read(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) */
+/* { */
+/*     Example* res; */
+
+/*     if(argc != 1) */
+/*     { */
+/*         return enif_make_badarg(env); */
+/*     } */
+
+/*     if(!enif_get_resource(env, argv[0], RES_TYPE, (void**) &res)) */
+/*     { */
+/* return enif_make_badarg(env); */
+/*     } */
+
+/*     return enif_make_int(env, res->id); */
+/* } */
+
+
+// open file
+static ERL_NIF_TERM h5fclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+  FileHandle* res;
+  herr_t err;
+
+  // parse arguments
+  check(argc == 1, "Incorrent number of arguments");
+  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &res) != 0,	\
+	"Can't get resource from argv");
+
+  // close file
+  err = H5Fclose(res->file_id);
+  check(err == 0, "Failed to close file.");
+
+  return ATOM_OK;
+
+ error:
+  return error_tuple(env, "Can not close file");
+};
+
 
 
 static int _convert_flag(char* file_access_flags, unsigned *flags)
@@ -162,7 +204,8 @@ static int _convert_flag(char* file_access_flags, unsigned *flags)
 static ErlNifFunc nif_funcs[] =
 {
   {"h5fcreate", 2, h5fcreate},
-  {"h5fopen", 2, h5fopen}
+  {"h5fopen", 2, h5fopen},
+  {"h5fclose", 1, h5fclose}
 };
 
 ERL_NIF_INIT(erlhdf5, nif_funcs, &load, NULL, NULL, NULL);
