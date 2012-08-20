@@ -5,9 +5,24 @@
 #include "dbg.h"
 #include "erlhdf5.h"
 
+#define MAXBUFLEN       1024
+#define ATOM(Id, Value) { Id = enif_make_atom(env, Value); }
+
 ErlNifResourceType* RES_TYPE;
 
-#define MAXBUFLEN       1024
+// Atoms (initialized in on_load)
+static ERL_NIF_TERM ATOM_TRUE;
+static ERL_NIF_TERM ATOM_FALSE;
+static ERL_NIF_TERM ATOM_OK;
+static ERL_NIF_TERM ATOM_ERROR;
+
+// prototype
+static int _convert_file_access_flag(char* allow_truncate , unsigned *file_access_mode);
+
+typedef struct
+{
+  hid_t* file_id;
+} FileHandle;
 
 /* // http://calymirror.appspot.com/github.com/boundary/eleveldb/blob/master/c_src/eleveldb.cc */
 
