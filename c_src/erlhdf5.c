@@ -99,44 +99,44 @@ static ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
   return error_tuple(env, "Can not create file");
 };
 
-/* // open file */
-/* static ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) */
-/* { */
-/*   hid_t file_id; */
-/*   FileHandle* res; */
-/*   ERL_NIF_TERM ret; */
-/*   char file_name[MAXBUFLEN]; */
-/*   char allow_truncate[MAXBUFLEN]; */
-/*   unsigned file_access_mode; */
+// open file
+static ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+  hid_t file_id;
+  FileHandle* res;
+  ERL_NIF_TERM ret;
+  char file_name[MAXBUFLEN];
+  char file_access_flags[MAXBUFLEN];
+  unsigned flags;
 
-/*   // parse arguments */
-/*   check(argc == 2, "Incorrent number of arguments"); */
-/*   check(enif_get_string(env, argv[0], file_name, sizeof(file_name), ERL_NIF_LATIN1) != 0, \ */
-/* 	"Can't get file name from argv"); */
-/*   check(enif_get_atom(env, argv[1], allow_truncate, sizeof(allow_truncate), ERL_NIF_LATIN1) != 0, \ */
-/* 	"Can't get file_access_flag from argv"); */
+  // parse arguments
+  check(argc == 2, "Incorrent number of arguments");
+  check(enif_get_string(env, argv[0], file_name, sizeof(file_name), ERL_NIF_LATIN1) != 0, \
+	"Can't get file name from argv");
+  check(enif_get_atom(env, argv[1], file_access_flags, sizeof(file_access_flags), ERL_NIF_LATIN1) != 0, \
+	"Can't get file_access_flag from argv");
 
-/*   // convert access flag to format which hdf5 api understand */
-/*   check(_convert_file_access_flag(allow_truncate, &file_access_mode) == 0, "Failed to convert access flag"); */
+  // convert access flag to format which hdf5 api understand
+  check(_convert_flag(file_access_flags, &flags) == 0, "Failed to convert access flag");
 
-/*   // create a new file using default properties */
-/*   file_id = H5Fcreate(file_name, file_access_mode, H5P_DEFAULT, H5P_DEFAULT); */
-/*   check(file_id > 0, "Failed to create %s.", file_name); */
+  // create a new file using default properties
+  file_id = H5Fopen(file_name, flags, H5P_DEFAULT);
+  check(file_id > 0, "Failed to open %s.", file_name);
 
-/*   // create a resource to pass reference to file_id back to erlang */
-/*   res = enif_alloc_resource(RES_TYPE, sizeof(FileHandle)); */
-/*   check(res, "Failed to allocate resource for type %s", "FileHandle"); */
+  // create a resource to pass reference to file_id back to erlang
+  res = enif_alloc_resource(RES_TYPE, sizeof(FileHandle));
+  check(res, "Failed to allocate resource for type %s", "FileHandle");
 
-/*   // add ref to resource */
-/*   res->file_id = &file_id; */
-/*   ret = enif_make_resource(env, res); */
-/*   enif_release_resource(res); */
-/*   return enif_make_tuple2(env, ATOM_OK, ret); */
+  // add ref to resource
+  res->file_id = &file_id;
+  ret = enif_make_resource(env, res);
+  enif_release_resource(res);
+  return enif_make_tuple2(env, ATOM_OK, ret);
 
-/*  error: */
-/*   if(file_id) H5Fclose (file_id); */
-/*   return error_tuple(env, "Can not create file"); */
-/* }; */
+ error:
+  if(file_id) H5Fclose (file_id);
+  return error_tuple(env, "Can not open file");
+};
 
 
 static int _convert_flag(char* file_access_flags, unsigned *flags)
@@ -161,7 +161,8 @@ static int _convert_flag(char* file_access_flags, unsigned *flags)
 
 static ErlNifFunc nif_funcs[] =
 {
-  {"h5fcreate", 2, h5fcreate}
+  {"h5fcreate", 2, h5fcreate},
+  {"h5fopen", 2, h5fopen}
 };
 
 ERL_NIF_INIT(erlhdf5, nif_funcs, &load, NULL, NULL, NULL);
