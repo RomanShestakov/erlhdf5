@@ -5,16 +5,6 @@
 #include "dbg.h"
 #include "erlhdf5.h"
 
-#define MAXBUFLEN       1024
-#define ATOM(Id, Value) { Id = enif_make_atom(env, Value); }
-
-ErlNifResourceType* RES_TYPE;
-
-// Atoms (initialized in on_load)
-static ERL_NIF_TERM ATOM_TRUE;
-static ERL_NIF_TERM ATOM_FALSE;
-static ERL_NIF_TERM ATOM_OK;
-static ERL_NIF_TERM ATOM_ERROR;
 
 // prototype
 static int _convert_flag(char* file_access_flags, unsigned *flags);
@@ -24,35 +14,6 @@ typedef struct
   hid_t file_id;
 } FileHandle;
 
-/* // http://calymirror.appspot.com/github.com/boundary/eleveldb/blob/master/c_src/eleveldb.cc */
-
-void free_res(ErlNifEnv* env, void* obj)
-{
-    /* Tracker* tracker = (Tracker*) enif_priv_data(env); */
-    /* tracker->count -= 1; */
-}
-
-static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM load_info)
-{
-    const char* mod = "erlhdf5";
-    const char* name = "FileHandle";
-    int flags = ERL_NIF_RT_CREATE | ERL_NIF_RT_TAKEOVER;
-
-    RES_TYPE = enif_open_resource_type(env, mod, name, free_res, flags, NULL);
-    check(RES_TYPE, "Failed to open resource type %s", name);
-
-    // Initialize common atoms
-    ATOM(ATOM_OK, "ok");
-    ATOM(ATOM_ERROR, "error");
-    ATOM(ATOM_TRUE, "true");
-    ATOM(ATOM_FALSE, "false");
-
-    return 0;
-
- error:
-    return -1;
-};
-
 // func to convert error message
 ERL_NIF_TERM error_tuple(ErlNifEnv* env, char* reason)
 {
@@ -61,7 +22,7 @@ ERL_NIF_TERM error_tuple(ErlNifEnv* env, char* reason)
 }
 
 // create file
-static ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   hid_t file_id;
   FileHandle* res;
@@ -100,7 +61,7 @@ static ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
 };
 
 // open file
-static ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   hid_t file_id;
   FileHandle* res;
@@ -138,28 +99,8 @@ static ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   return error_tuple(env, "Can not open file");
 };
 
-
-/* static ERL_NIF_TERM */
-/* read(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) */
-/* { */
-/*     Example* res; */
-
-/*     if(argc != 1) */
-/*     { */
-/*         return enif_make_badarg(env); */
-/*     } */
-
-/*     if(!enif_get_resource(env, argv[0], RES_TYPE, (void**) &res)) */
-/*     { */
-/* return enif_make_badarg(env); */
-/*     } */
-
-/*     return enif_make_int(env, res->id); */
-/* } */
-
-
 // open file
-static ERL_NIF_TERM h5fclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+ERL_NIF_TERM h5fclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   FileHandle* res;
   herr_t err;
@@ -199,13 +140,3 @@ static int _convert_flag(char* file_access_flags, unsigned *flags)
  error:
   return -1;
 };
-
-
-static ErlNifFunc nif_funcs[] =
-{
-  {"h5fcreate", 2, h5fcreate},
-  {"h5fopen", 2, h5fopen},
-  {"h5fclose", 1, h5fclose}
-};
-
-ERL_NIF_INIT(erlhdf5, nif_funcs, &load, NULL, NULL, NULL);
