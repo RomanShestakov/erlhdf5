@@ -1,4 +1,4 @@
--module(erlhdf5_tests).
+-module(erlh5f_tests).
 -compile([export_all]).
 -include_lib("eunit/include/eunit.hrl").
 -include("../include/erlhdf5.hrl").
