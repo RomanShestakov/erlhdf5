@@ -41,10 +41,16 @@ ERL_NIF_TERM h5screate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   // add ref to resource
   res->id = dataspace_id;
   ret = enif_make_resource(env, res);
+
+  // cleanup
   enif_release_resource(res);
+  free(dimsf);
+
   return enif_make_tuple2(env, ATOM_OK, ret);
 
  error:
   if(dataspace_id) H5Sclose(dataspace_id);
+  if(dimsf) free(dimsf);
+
   return error_tuple(env, "Can not create dataspace");
 };

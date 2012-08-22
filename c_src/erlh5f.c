@@ -5,21 +5,8 @@
 #include "dbg.h"
 #include "erlhdf5.h"
 
-
 // prototype
 static int _convert_flag(char* file_access_flags, unsigned *flags);
-
-/* typedef struct */
-/* { */
-/*   hid_t file_id; */
-/* } FileHandle; */
-
-/* // func to convert error message */
-/* ERL_NIF_TERM error_tuple(ErlNifEnv* env, char* reason) */
-/* { */
-/*     ERL_NIF_TERM why = enif_make_string(env, reason, ERL_NIF_LATIN1); */
-/*     return enif_make_tuple2(env, ATOM_ERROR, why); */
-/* } */
 
 // create file
 ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
