@@ -9,23 +9,23 @@
 // prototype
 static int _convert_flag(char* file_access_flags, unsigned *flags);
 
-typedef struct
-{
-  hid_t file_id;
-} FileHandle;
+/* typedef struct */
+/* { */
+/*   hid_t file_id; */
+/* } FileHandle; */
 
-// func to convert error message
-ERL_NIF_TERM error_tuple(ErlNifEnv* env, char* reason)
-{
-    ERL_NIF_TERM why = enif_make_string(env, reason, ERL_NIF_LATIN1);
-    return enif_make_tuple2(env, ATOM_ERROR, why);
-}
+/* // func to convert error message */
+/* ERL_NIF_TERM error_tuple(ErlNifEnv* env, char* reason) */
+/* { */
+/*     ERL_NIF_TERM why = enif_make_string(env, reason, ERL_NIF_LATIN1); */
+/*     return enif_make_tuple2(env, ATOM_ERROR, why); */
+/* } */
 
 // create file
 ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   hid_t file_id;
-  FileHandle* res;
+  Handle* res;
   ERL_NIF_TERM ret;
   char file_name[MAXBUFLEN];
   char file_access_flags[MAXBUFLEN];
@@ -46,11 +46,11 @@ ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   check(file_id > 0, "Failed to create %s.", file_name);
 
   // create a resource to pass reference to file_id back to erlang
-  res = enif_alloc_resource(RES_TYPE, sizeof(FileHandle));
+  res = enif_alloc_resource(RES_TYPE, sizeof(Handle));
   check(res, "Failed to allocate resource for type %s", "FileHandle");
 
   // add ref to resource
-  res->file_id = file_id;
+  res->id = file_id;
   ret = enif_make_resource(env, res);
   enif_release_resource(res);
   return enif_make_tuple2(env, ATOM_OK, ret);
@@ -64,7 +64,7 @@ ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   hid_t file_id;
-  FileHandle* res;
+  Handle* res;
   ERL_NIF_TERM ret;
   char file_name[MAXBUFLEN];
   char file_access_flags[MAXBUFLEN];
@@ -85,11 +85,11 @@ ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   check(file_id > 0, "Failed to open %s.", file_name);
 
   // create a resource to pass reference to file_id back to erlang
-  res = enif_alloc_resource(RES_TYPE, sizeof(FileHandle));
+  res = enif_alloc_resource(RES_TYPE, sizeof(Handle));
   check(res, "Failed to allocate resource for type %s", "FileHandle");
 
   // add ref to resource
-  res->file_id = file_id;
+  res->id = file_id;
   ret = enif_make_resource(env, res);
   enif_release_resource(res);
   return enif_make_tuple2(env, ATOM_OK, ret);
@@ -102,7 +102,7 @@ ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 // open file
 ERL_NIF_TERM h5fclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-  FileHandle* res;
+  Handle* res;
   herr_t err;
 
   // parse arguments
@@ -111,7 +111,7 @@ ERL_NIF_TERM h5fclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 	"Can't get resource from argv");
 
   // close file
-  err = H5Fclose(res->file_id);
+  err = H5Fclose(res->id);
   check(err == 0, "Failed to close file.");
 
   return ATOM_OK;

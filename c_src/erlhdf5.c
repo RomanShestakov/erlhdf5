@@ -29,12 +29,19 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM load_info)
     return -1;
 };
 
+// func to convert error message
+ERL_NIF_TERM error_tuple(ErlNifEnv* env, char* reason)
+{
+    ERL_NIF_TERM why = enif_make_string(env, reason, ERL_NIF_LATIN1);
+    return enif_make_tuple2(env, ATOM_ERROR, why);
+}
 
 static ErlNifFunc nif_funcs[] =
 {
   {"h5fcreate", 2, h5fcreate},
   {"h5fopen", 2, h5fopen},
-  {"h5fclose", 1, h5fclose}
+  {"h5fclose", 1, h5fclose},
+  {"h5screate", 2, h5screate}
 };
 
 ERL_NIF_INIT(erlhdf5, nif_funcs, &load, NULL, NULL, NULL);

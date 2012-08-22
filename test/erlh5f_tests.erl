@@ -37,5 +37,5 @@ close(H) ->
 
 run(_P) ->
     [
-     ?_assertMatch(ok, ok)
+     ?_assertMatch({ok, _}, erlhdf5:h5screate(2, {2, 2}))
     ].

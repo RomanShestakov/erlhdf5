@@ -1,5 +1,5 @@
 -module(erlhdf5).
--export([h5fcreate/2, h5fopen/2, h5fclose/1]).
+-export([h5fcreate/2, h5fopen/2, h5fclose/1, h5screate/2]).
 
 -include("../include/erlhdf5.hrl").
 
@@ -34,6 +34,17 @@ h5fopen(_FileName, _Flag) ->
 -spec h5fclose(FileHandler::binary()) -> ok | {error, Reason::atom()}.
 h5fclose(_FileHandler) ->
     nif_error(?LINE).
+
+
+%%--------------------------------------------------------------------
+%% @doc
+%% create hds5 file
+%% @end
+%%--------------------------------------------------------------------
+-spec h5screate(Rank::integer(), Dimensions::tuple()) -> {ok, binary()} | {error, atom()}.
+h5screate(_Rank, _Dimensions) ->
+    nif_error(?LINE).
+
 
 nif_error(Line) ->
     exit({nit_library_not_loaded, module, ?MODULE, line, Line}).
