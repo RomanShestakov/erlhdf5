@@ -18,14 +18,14 @@
 
 /* Author contact: romanshestakov@yahoo.co.uk */
 
-#include "hdf5.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "hdf5.h"
 #include "erl_nif.h"
 #include "dbg.h"
 #include "erlhdf5.h"
 
-// implementations for H5F: File interface
+// H5S: Dataspace Interface
 
 // creates a new simple dataspace and opens it for access
 ERL_NIF_TERM h5screate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])

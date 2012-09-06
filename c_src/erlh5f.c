@@ -18,12 +18,14 @@
 
 /* Author contact: romanshestakov@yahoo.co.uk */
 
-#include "hdf5.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "hdf5.h"
 #include "erl_nif.h"
 #include "dbg.h"
 #include "erlhdf5.h"
+
+// H5F: File interface
 
 // prototype
 static int _convert_flag(char* file_access_flags, unsigned *flags);
