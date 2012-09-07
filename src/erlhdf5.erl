@@ -19,7 +19,9 @@
 %%% Author contact: romanshestakov@yahoo.co.uk
 
 -module(erlhdf5).
--export([h5fcreate/2, h5fopen/2, h5fclose/1, h5screate/2]).
+-export([h5fcreate/2, h5fopen/2, h5fclose/1]).
+-export([h5screate/2]).
+-export([h5pcreate/1, h5pclose/1]).
 
 -include("../include/erlhdf5.hrl").
 
@@ -55,7 +57,6 @@ h5fopen(_FileName, _Flag) ->
 h5fclose(_FileHandler) ->
     nif_error(?LINE).
 
-
 %%--------------------------------------------------------------------
 %% @doc
 %% create hds5 file
@@ -65,6 +66,23 @@ h5fclose(_FileHandler) ->
 h5screate(_Rank, _Dimensions) ->
     nif_error(?LINE).
 
+%%--------------------------------------------------------------------
+%% @doc
+%% create a new property list as an instance of a property list class
+%% @end
+%%--------------------------------------------------------------------
+-spec h5pcreate(Class::string()) -> {ok, binary()} | {error, atom()}.
+h5pcreate(_Class) ->
+    nif_error(?LINE).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% close properties list
+%% @end
+%%--------------------------------------------------------------------
+-spec h5pclose(Handler::binary()) -> ok | {error, Reason::atom()}.
+h5pclose(_Handler) ->
+    nif_error(?LINE).
 
 nif_error(Line) ->
     exit({nit_library_not_loaded, module, ?MODULE, line, Line}).

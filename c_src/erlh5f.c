@@ -27,9 +27,6 @@
 
 // H5F: File interface
 
-// prototype
-static int _convert_flag(char* file_access_flags, unsigned *flags);
-
 // create file
 ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
@@ -48,7 +45,7 @@ ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 	"Can't get file_access_flag from argv");
 
   // convert access flag to format which hdf5 api understand
-  check(_convert_flag(file_access_flags, &flags) == 0, "Failed to convert access flag");
+  check(convert_flag(file_access_flags, &flags) == 0, "Failed to convert access flag");
 
   // create a new file using default properties
   file_id = H5Fcreate(file_name, flags, H5P_DEFAULT, H5P_DEFAULT);
@@ -87,7 +84,7 @@ ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 	"Can't get file_access_flag from argv");
 
   // convert access flag to format which hdf5 api understand
-  check(_convert_flag(file_access_flags, &flags) == 0, "Failed to convert access flag");
+  check(convert_flag(file_access_flags, &flags) == 0, "Failed to convert access flag");
 
   // create a new file using default properties
   file_id = H5Fopen(file_name, flags, H5P_DEFAULT);
@@ -127,25 +124,4 @@ ERL_NIF_TERM h5fclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
  error:
   return error_tuple(env, "Can not close file");
-};
-
-
-
-static int _convert_flag(char* file_access_flags, unsigned *flags)
-{
-  if(strncmp(file_access_flags, "H5F_ACC_TRUNC", MAXBUFLEN) == 0)
-      *flags = H5F_ACC_TRUNC;
-  else if(strncmp(file_access_flags, "H5F_ACC_EXCL", MAXBUFLEN) == 0)
-    *flags = H5F_ACC_EXCL;
-  else if(strncmp(file_access_flags, "H5F_ACC_RDWR", MAXBUFLEN) == 0)
-    *flags = H5F_ACC_RDWR;
-  else if(strncmp(file_access_flags, "H5F_ACC_RDONLY", MAXBUFLEN) == 0)
-    *flags = H5F_ACC_RDONLY;
-  else
-    sentinel("Unknown file access flag %s", file_access_flags);
-
-  return 0;
-
- error:
-  return -1;
 };
