@@ -27,6 +27,62 @@
 
 // H5F: File interface
 
+// prototype
+static int convert_access_flag(char* file_flags, unsigned *flags);
+
+// convert
+static int convert_access_flag(char* file_flags, unsigned *flags)
+{
+  if(strncmp(file_flags, "H5F_ACC_TRUNC", MAXBUFLEN) == 0)
+    *flags = H5F_ACC_TRUNC;
+  else if(strncmp(file_flags, "H5F_ACC_EXCL", MAXBUFLEN) == 0)
+    *flags = H5F_ACC_EXCL;
+  else if(strncmp(file_flags, "H5F_ACC_RDWR", MAXBUFLEN) == 0)
+    *flags = H5F_ACC_RDWR;
+  else if(strncmp(file_flags, "H5F_ACC_RDONLY", MAXBUFLEN) == 0)
+    *flags = H5F_ACC_RDONLY;
+  /* else if(strncmp(file_flags, "H5P_OBJECT_CREATE", MAXBUFLEN) == 0) */
+  /*   *flags = H5P_OBJECT_CREATE; */
+  /* else if(strncmp(file_flags, "H5P_FILE_CREATE", MAXBUFLEN) == 0) */
+  /*   *flags = H5P_FILE_CREATE; */
+  /* else if(strncmp(file_flags, "H5P_FILE_ACCESS", MAXBUFLEN) == 0) */
+  /*   *flags = H5P_FILE_ACCESS; */
+  /* else if(strncmp(file_flags, "H5P_DATASET_CREATE", MAXBUFLEN) == 0) */
+  /*   *flags = H5P_DATASET_CREATE; */
+  /* else if(strncmp(file_flags, "H5P_DATASET_ACCESS", MAXBUFLEN) == 0) */
+  /*   *flags = H5P_DATASET_ACCESS; */
+  /* else if(strncmp(file_flags, "H5P_DATASET_XFER", MAXBUFLEN) == 0) */
+  /*   *flags = H5P_DATASET_XFER; */
+  /* else if(strncmp(file_flags, "H5P_FILE_MOUNT", MAXBUFLEN) == 0) */
+  /*   *flags = H5P_FILE_MOUNT; */
+  /* else if(strncmp(file_flags, "H5P_GROUP_CREATE", MAXBUFLEN) == 0) */
+  /*   *flags = H5P_GROUP_CREATE; */
+  /* else if(strncmp(file_flags, "H5P_GROUP_ACCESS", MAXBUFLEN) == 0) */
+  /*   *flags = H5P_GROUP_ACCESS; */
+  /* else if(strncmp(file_flags, "H5P_DATATYPE_CREATE", MAXBUFLEN) == 0) */
+  /*   *flags = H5P_DATATYPE_CREATE; */
+  /* else if(strncmp(file_flags, "H5P_DATATYPE_ACCESS", MAXBUFLEN) == 0) */
+  /*   *flags = H5P_DATATYPE_ACCESS; */
+  /* else if(strncmp(file_flags, "H5P_STRING_CREATE", MAXBUFLEN) == 0) */
+  /*   *flags = H5P_STRING_CREATE; */
+  /* else if(strncmp(file_flags, "H5P_ATTRIBUTE_CREATE", MAXBUFLEN) == 0) */
+  /*   *flags = H5P_ATTRIBUTE_CREATE; */
+  /* else if(strncmp(file_flags, "H5P_OBJECT_COPY", MAXBUFLEN) == 0) */
+  /*   *flags = H5P_OBJECT_COPY; */
+  /* else if(strncmp(file_flags, "H5P_LINK_CREATE", MAXBUFLEN) == 0) */
+  /*   *flags = H5P_LINK_CREATE; */
+  /* else if(strncmp(file_flags, "H5P_LINK_ACCESS", MAXBUFLEN) == 0) */
+  /*   *flags = H5P_LINK_ACCESS; */
+  else
+    sentinel("Unknown file access flag %s", file_flags);
+
+  return 0;
+
+ error:
+  return -1;
+};
+
+
 // create file
 ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
@@ -45,7 +101,7 @@ ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 	"Can't get file_access_flag from argv");
 
   // convert access flag to format which hdf5 api understand
-  check(convert_flag(file_access_flags, &flags) == 0, "Failed to convert access flag");
+  check(convert_access_flag(file_access_flags, &flags) == 0, "Failed to convert access flag");
 
   // create a new file using default properties
   file_id = H5Fcreate(file_name, flags, H5P_DEFAULT, H5P_DEFAULT);
@@ -84,7 +140,7 @@ ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 	"Can't get file_access_flag from argv");
 
   // convert access flag to format which hdf5 api understand
-  check(convert_flag(file_access_flags, &flags) == 0, "Failed to convert access flag");
+  check(convert_access_flag(file_access_flags, &flags) == 0, "Failed to convert access flag");
 
   // create a new file using default properties
   file_id = H5Fopen(file_name, flags, H5P_DEFAULT);

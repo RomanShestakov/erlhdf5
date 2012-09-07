@@ -1,4 +1,4 @@
--module(erlh5p_tests).
+-module(erlh5t_tests).
 -compile([export_all]).
 -include_lib("eunit/include/eunit.hrl").
 -include("../include/erlhdf5.hrl").
@@ -10,11 +10,11 @@ erlhdf5_prop_list_create_test_() ->
      fun run/1}.
 
 create() ->
-    {ok, H} = erlhdf5:h5pcreate('H5P_DATASET_CREATE'),
+    {ok, H} = erlhdf5:h5tcopy('H5T_NATIVE_INT'),
     H.
 
 close(H) ->
-    ok = erlhdf5:h5pclose(H).
+    ok = erlhdf5:h5tclose(H).
 
 run(_P) ->
     [

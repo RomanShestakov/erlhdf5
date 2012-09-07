@@ -35,42 +35,6 @@ static int convert_type(char* dtype,  hid_t* dtype_id)
 {
   if(strncmp(dtype, "H5T_NATIVE_INT", MAXBUFLEN) == 0)
     *dtype_id = H5T_NATIVE_INT;
-  /* else if(strncmp(file_flags, "H5F_ACC_EXCL", MAXBUFLEN) == 0) */
-  /*   *flags = H5F_ACC_EXCL; */
-  /* else if(strncmp(file_flags, "H5F_ACC_RDWR", MAXBUFLEN) == 0) */
-  /*   *flags = H5F_ACC_RDWR; */
-  /* else if(strncmp(file_flags, "H5F_ACC_RDONLY", MAXBUFLEN) == 0) */
-  /*   *flags = H5F_ACC_RDONLY; */
-  /* else if(strncmp(file_flags, "H5P_OBJECT_CREATE", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_OBJECT_CREATE; */
-  /* else if(strncmp(file_flags, "H5P_FILE_CREATE", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_FILE_CREATE; */
-  /* else if(strncmp(file_flags, "H5P_FILE_ACCESS", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_FILE_ACCESS; */
-  /* else if(strncmp(file_flags, "H5P_DATASET_CREATE", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_DATASET_CREATE; */
-  /* else if(strncmp(file_flags, "H5P_DATASET_ACCESS", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_DATASET_ACCESS; */
-  /* else if(strncmp(file_flags, "H5P_DATASET_XFER", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_DATASET_XFER; */
-  /* else if(strncmp(file_flags, "H5P_FILE_MOUNT", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_FILE_MOUNT; */
-  /* else if(strncmp(file_flags, "H5P_GROUP_CREATE", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_GROUP_CREATE; */
-  /* else if(strncmp(file_flags, "H5P_GROUP_ACCESS", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_GROUP_ACCESS; */
-  /* else if(strncmp(file_flags, "H5P_DATATYPE_CREATE", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_DATATYPE_CREATE; */
-  /* else if(strncmp(file_flags, "H5P_DATATYPE_ACCESS", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_DATATYPE_ACCESS; */
-  /* else if(strncmp(file_flags, "H5P_STRING_CREATE", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_STRING_CREATE; */
-  /* else if(strncmp(file_flags, "H5P_ATTRIBUTE_CREATE", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_ATTRIBUTE_CREATE; */
-  /* else if(strncmp(file_flags, "H5P_OBJECT_COPY", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_OBJECT_COPY; */
-  /* else if(strncmp(file_flags, "H5P_LINK_CREATE", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_LINK_CREATE; */
   /* else if(strncmp(file_flags, "H5P_LINK_ACCESS", MAXBUFLEN) == 0) */
   /*   *flags = H5P_LINK_ACCESS; */
   else
@@ -101,7 +65,7 @@ ERL_NIF_TERM h5tcopy(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   // convert type to format which hdf5 api understand
   check(convert_type(type, &dtype_id) == 0, "Failed to convert type");
 
-  type_id = H5Pcreate(dtype_id);
+  type_id = H5Tcopy(dtype_id);
   check(type_id > 0, "Failed to create type.");
 
   // create a resource to pass reference to id back to erlang
@@ -123,23 +87,24 @@ ERL_NIF_TERM h5tcopy(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   return error_tuple(env, "Can not copy type");
 };
 
-/* // close */
-/* ERL_NIF_TERM h5pclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) */
-/* { */
-/*   Handle* res; */
-/*   herr_t err; */
 
-/*   // parse arguments */
-/*   check(argc == 1, "Incorrent number of arguments"); */
-/*   check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &res) != 0,	\ */
-/* 	"Can't get resource from argv"); */
+// close
+ERL_NIF_TERM h5tclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+  Handle* res;
+  herr_t err;
 
-/*   // close properties list */
-/*   err = H5Pclose(res->id); */
-/*   check(err == 0, "Failed to close properties list."); */
+  // parse arguments
+  check(argc == 1, "Incorrent number of arguments");
+  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &res) != 0,	\
+	"Can't get resource from argv");
 
-/*   return ATOM_OK; */
+  // close properties list
+  err = H5Tclose(res->id);
+  check(err == 0, "Failed to close type.");
 
-/*  error: */
-/*   return error_tuple(env, "Can not close properties list"); */
-/* }; */
+  return ATOM_OK;
+
+ error:
+  return error_tuple(env, "Can not close type");
+};

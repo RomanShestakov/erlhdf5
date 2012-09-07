@@ -26,6 +26,52 @@
 #include "erlhdf5.h"
 
 // H5P: Property List Interface
+static int convert_property_flag(char* file_flags, unsigned *flags);
+
+// convert
+static int convert_property_flag(char* file_flags, unsigned *flags)
+{
+  if(strncmp(file_flags, "H5P_OBJECT_CREATE", MAXBUFLEN) == 0)
+    *flags = H5P_OBJECT_CREATE;
+  else if(strncmp(file_flags, "H5P_FILE_CREATE", MAXBUFLEN) == 0)
+    *flags = H5P_FILE_CREATE;
+  else if(strncmp(file_flags, "H5P_FILE_ACCESS", MAXBUFLEN) == 0)
+    *flags = H5P_FILE_ACCESS;
+  else if(strncmp(file_flags, "H5P_DATASET_CREATE", MAXBUFLEN) == 0)
+    *flags = H5P_DATASET_CREATE;
+  else if(strncmp(file_flags, "H5P_DATASET_ACCESS", MAXBUFLEN) == 0)
+    *flags = H5P_DATASET_ACCESS;
+  else if(strncmp(file_flags, "H5P_DATASET_XFER", MAXBUFLEN) == 0)
+    *flags = H5P_DATASET_XFER;
+  else if(strncmp(file_flags, "H5P_FILE_MOUNT", MAXBUFLEN) == 0)
+    *flags = H5P_FILE_MOUNT;
+  else if(strncmp(file_flags, "H5P_GROUP_CREATE", MAXBUFLEN) == 0)
+    *flags = H5P_GROUP_CREATE;
+  else if(strncmp(file_flags, "H5P_GROUP_ACCESS", MAXBUFLEN) == 0)
+    *flags = H5P_GROUP_ACCESS;
+  else if(strncmp(file_flags, "H5P_DATATYPE_CREATE", MAXBUFLEN) == 0)
+    *flags = H5P_DATATYPE_CREATE;
+  else if(strncmp(file_flags, "H5P_DATATYPE_ACCESS", MAXBUFLEN) == 0)
+    *flags = H5P_DATATYPE_ACCESS;
+  else if(strncmp(file_flags, "H5P_STRING_CREATE", MAXBUFLEN) == 0)
+    *flags = H5P_STRING_CREATE;
+  else if(strncmp(file_flags, "H5P_ATTRIBUTE_CREATE", MAXBUFLEN) == 0)
+    *flags = H5P_ATTRIBUTE_CREATE;
+  else if(strncmp(file_flags, "H5P_OBJECT_COPY", MAXBUFLEN) == 0)
+    *flags = H5P_OBJECT_COPY;
+  else if(strncmp(file_flags, "H5P_LINK_CREATE", MAXBUFLEN) == 0)
+    *flags = H5P_LINK_CREATE;
+  else if(strncmp(file_flags, "H5P_LINK_ACCESS", MAXBUFLEN) == 0)
+    *flags = H5P_LINK_ACCESS;
+  else
+    sentinel("Unknown properties flag %s", file_flags);
+
+  return 0;
+
+ error:
+  return -1;
+};
+
 
 // Creates a new property list as an instance of a property list class.
 ERL_NIF_TERM h5pcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
@@ -42,7 +88,7 @@ ERL_NIF_TERM h5pcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 	"Can't get class id from argv");
 
   // convert access flag to format which hdf5 api understand
-  check(convert_flag(cls, &cls_id) == 0, "Failed to convert access flag");
+  check(convert_property_flag(cls, &cls_id) == 0, "Failed to convert access flag");
 
   // create a new file using default properties
   dcpl_id = H5Pcreate(cls_id);
