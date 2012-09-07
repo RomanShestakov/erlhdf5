@@ -53,7 +53,7 @@ static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM load_info)
 int convert_flag(char* file_flags, unsigned *flags)
 {
   if(strncmp(file_flags, "H5F_ACC_TRUNC", MAXBUFLEN) == 0)
-      *flags = H5F_ACC_TRUNC;
+    *flags = H5F_ACC_TRUNC;
   else if(strncmp(file_flags, "H5F_ACC_EXCL", MAXBUFLEN) == 0)
     *flags = H5F_ACC_EXCL;
   else if(strncmp(file_flags, "H5F_ACC_RDWR", MAXBUFLEN) == 0)
@@ -116,7 +116,8 @@ static ErlNifFunc nif_funcs[] =
   {"h5fclose", 1, h5fclose},
   {"h5screate", 2, h5screate},
   {"h5pcreate", 1, h5pcreate},
-  {"h5pclose", 1, h5pclose}
+  {"h5pclose", 1, h5pclose},
+  {"h5tcopy", 1, h5tcopy}
 };
 
 ERL_NIF_INIT(erlhdf5, nif_funcs, &load, NULL, NULL, NULL);

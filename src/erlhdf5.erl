@@ -22,6 +22,7 @@
 -export([h5fcreate/2, h5fopen/2, h5fclose/1]).
 -export([h5screate/2]).
 -export([h5pcreate/1, h5pclose/1]).
+-export([h5tcopy/1]).
 
 -include("../include/erlhdf5.hrl").
 
@@ -82,6 +83,15 @@ h5pcreate(_Class) ->
 %%--------------------------------------------------------------------
 -spec h5pclose(Handler::binary()) -> ok | {error, Reason::atom()}.
 h5pclose(_Handler) ->
+    nif_error(?LINE).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% Copies an existing datatype.
+%% @end
+%%--------------------------------------------------------------------
+-spec h5tcopy(Handler::binary()) -> ok | {error, Reason::atom()}.
+h5tcopy(_Handler) ->
     nif_error(?LINE).
 
 nif_error(Line) ->
