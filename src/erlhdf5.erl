@@ -29,7 +29,7 @@
 -on_load(init/0).
 
 init() ->
-    erlang:load_nif(filename:join(["priv", "erlhdf5"]), 0).
+    erlang:load_nif(filename:join([code:priv_dir(erlhdf5), "erlhdf5"]), 0).
 
 %%--------------------------------------------------------------------
 %% @doc

@@ -22,3 +22,4 @@ test: all
 	mkdir -p .eunit
 	cp -r priv .eunit/.
 	./rebar skip_deps=true eunit
+	./rebar ct
