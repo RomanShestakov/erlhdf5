@@ -23,6 +23,7 @@
 -export([h5screate_simple/2, h5sclose/1]).
 -export([h5pcreate/1, h5pclose/1]).
 -export([h5tcopy/1, h5tclose/1]).
+-export([h5dcreate/5, h5dclose/1]).
 
 -include("../include/erlhdf5.hrl").
 
@@ -119,6 +120,26 @@ h5tcopy(_Handler) ->
 %%--------------------------------------------------------------------
 -spec h5tclose(Handler::binary()) -> ok | {error, Reason::atom()}.
 h5tclose(_Handler) ->
+    nif_error(?LINE).
+
+
+%%--------------------------------------------------------------------
+%% @doc
+%% create a new dataset
+%% @end
+%%--------------------------------------------------------------------
+-spec h5dcreate(File::binary(), Name::string(), Type::binary(), Space::binary(), Prop::binary()) ->
+		       {ok, binary()} | {error, atom()}.
+h5dcreate(_File, _Name, _Type, _Space, _Prop) ->
+    nif_error(?LINE).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% close dataset
+%% @end
+%%--------------------------------------------------------------------
+-spec h5dclose (Handler::binary()) -> ok | {error, Reason::atom()}.
+h5dclose(_Handler) ->
     nif_error(?LINE).
 
 nif_error(Line) ->

@@ -66,7 +66,9 @@ static ErlNifFunc nif_funcs[] =
   {"h5pcreate", 1, h5pcreate},
   {"h5pclose", 1, h5pclose},
   {"h5tcopy", 1, h5tcopy},
-  {"h5tclose", 1, h5tclose}
+  {"h5tclose", 1, h5tclose},
+  {"h5dcreate", 5, h5dcreate},
+  {"h5dclose", 1, h5dclose},
 };
 
 ERL_NIF_INIT(erlhdf5, nif_funcs, &load, NULL, NULL, NULL);
