@@ -29,7 +29,16 @@
 -on_load(init/0).
 
 init() ->
-    erlang:load_nif(filename:join([code:priv_dir(erlhdf5), "erlhdf5"]), 0).
+    erlang:load_nif(filename:join([get_priv_dir(?MODULE), "erlhdf5"]), 0).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% get a path to priv dir
+%% @end
+%%--------------------------------------------------------------------
+-spec get_priv_dir(atom()) -> file:filename().
+get_priv_dir(Module) ->
+    filename:join([filename:dirname(filename:dirname(code:which(Module))), "priv"]).
 
 %%--------------------------------------------------------------------
 %% @doc
