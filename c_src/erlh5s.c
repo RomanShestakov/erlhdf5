@@ -49,9 +49,6 @@ ERL_NIF_TERM h5screate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     dimsf[i] = (int)terms[i];
   }
 
-  /* // convert access flag to format which hdf5 api understand */
-  /* check(_convert_flag(file_access_flags, &flags) == 0, "Failed to convert access flag"); */
-
   // create a new file using default properties
   dataspace_id = H5Screate_simple(rank, dimsf, NULL);
   check(dataspace_id > 0, "Failed to create dataspace.");
@@ -75,4 +72,25 @@ ERL_NIF_TERM h5screate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   if(dimsf) free(dimsf);
 
   return error_tuple(env, "Can not create dataspace");
+};
+
+// close
+ERL_NIF_TERM h5sclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+  Handle* res;
+  herr_t err;
+
+  // parse arguments
+  check(argc == 1, "Incorrent number of arguments");
+  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &res) != 0,	\
+	"Can't get resource from argv");
+
+  // close properties list
+  err = H5Sclose(res->id);
+  check(err == 0, "Failed to close dataspace.");
+
+  return ATOM_OK;
+
+ error:
+  return error_tuple(env, "Can not close dataspace");
 };
