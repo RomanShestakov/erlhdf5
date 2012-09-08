@@ -20,7 +20,7 @@
 
 -module(erlhdf5).
 -export([h5fcreate/2, h5fopen/2, h5fclose/1]).
--export([h5screate/2, h5sclose/1]).
+-export([h5screate_simple/2, h5sclose/1]).
 -export([h5pcreate/1, h5pclose/1]).
 -export([h5tcopy/1, h5tclose/1]).
 
@@ -72,8 +72,8 @@ h5fclose(_FileHandler) ->
 %% create dataspace
 %% @end
 %%--------------------------------------------------------------------
--spec h5screate(Rank::integer(), Dimensions::tuple()) -> {ok, binary()} | {error, atom()}.
-h5screate(_Rank, _Dimensions) ->
+-spec h5screate_simple(Rank::integer(), Dimensions::tuple()) -> {ok, binary()} | {error, atom()}.
+h5screate_simple(_Rank, _Dimensions) ->
     nif_error(?LINE).
 
 %%--------------------------------------------------------------------

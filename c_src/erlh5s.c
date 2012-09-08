@@ -28,7 +28,7 @@
 // H5S: Dataspace Interface
 
 // creates a new simple dataspace and opens it for access
-ERL_NIF_TERM h5screate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+ERL_NIF_TERM h5screate_simple(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   hid_t dataspace_id;
   Handle* res;

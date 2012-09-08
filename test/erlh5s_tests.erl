@@ -10,7 +10,7 @@ erlhdf5_prop_list_create_test_() ->
      fun run/1}.
 
 create() ->
-    {ok, H} = erlhdf5:h5screate(2, {4, 7}),
+    {ok, H} = erlhdf5:h5screate_simple(2, {4, 7}),
     H.
 
 close(H) ->
