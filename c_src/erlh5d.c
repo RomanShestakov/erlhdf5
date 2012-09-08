@@ -27,6 +27,29 @@
 
 //  H5D: Datasets Interface
 
+
+// protype
+static herr_t convert_space_status(H5D_space_status_t,  char*);
+
+// convert
+static herr_t convert_space_status(H5D_space_status_t space_status,  char* space_status_str)
+{
+  if(space_status == H5D_SPACE_STATUS_ALLOCATED)
+    strcpy(space_status_str, "H5D_SPACE_STATUS_ALLOCATED");
+  else if(space_status == H5D_SPACE_STATUS_NOT_ALLOCATED)
+    strcpy(space_status_str, "H5D_SPACE_STATUS_NOT_ALLOCATED");
+  else if(space_status == H5D_SPACE_STATUS_PART_ALLOCATED)
+    strcpy(space_status_str, "H5D_SPACE_STATUS_PART_ALLOCATED");
+  else
+    sentinel("Unknown status %d", space_status);
+
+  return 0;
+
+ error:
+  return -1;
+};
+
+
 // creates a new simple dataspace and opens it for access
 ERL_NIF_TERM h5dcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
@@ -63,7 +86,7 @@ ERL_NIF_TERM h5dcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   dcpl_id = dcpl_res->id;
 
   // create a new file using default properties
-  ds_id = H5Dcreate(file_id, ds_name, type_id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  ds_id = H5Dcreate(file_id, ds_name, type_id, dataspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
   check(ds_id > 0, "Failed to create dataset.");
 
   // create a resource to pass reference to id back to erlang
@@ -105,3 +128,41 @@ ERL_NIF_TERM h5dclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
  error:
   return error_tuple(env, "Can not close dataset");
 };
+
+
+// Determines whether space has been allocated for a dataset.
+ERL_NIF_TERM h5d_get_space_status(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+  ERL_NIF_TERM ret;
+  Handle* dataset_res;
+  hid_t ds_id;
+  H5D_space_status_t      space_status;
+  char space_status_str[MAXBUFLEN];
+  herr_t err;
+
+  // parse arguments
+  check(argc == 1, "Incorrent number of arguments");
+  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &dataset_res) != 0,	\
+	"Can't get dataset resource from argv");
+
+  ds_id = dataset_res->id;
+
+  // create a new file using default properties
+  err = H5Dget_space_status(ds_id, &space_status);
+  check(err == 0, "Failed to get space status.");
+
+  err = convert_space_status(space_status, space_status_str);
+  check(err == 0, "Failed to convert space status %d", space_status);
+
+  //printf( "status string %s \n",  space_status_str);
+
+  ret = enif_make_atom(env, space_status_str);
+
+  return enif_make_tuple2(env, ATOM_OK, ret);
+
+ error:
+  if(ds_id) H5Dclose(ds_id);
+
+  return error_tuple(env, "Can not create dataset");
+};
+

@@ -23,7 +23,7 @@
 -export([h5screate_simple/2, h5sclose/1]).
 -export([h5pcreate/1, h5pclose/1]).
 -export([h5tcopy/1, h5tclose/1]).
--export([h5dcreate/5, h5dclose/1]).
+-export([h5dcreate/5, h5dclose/1, h5d_get_space_status/1]).
 
 -include("../include/erlhdf5.hrl").
 
@@ -141,6 +141,16 @@ h5dcreate(_File, _Name, _Type, _Space, _Prop) ->
 -spec h5dclose (Handler::binary()) -> ok | {error, Reason::atom()}.
 h5dclose(_Handler) ->
     nif_error(?LINE).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% Determines whether space has been allocated for a dataset.
+%% @end
+%%--------------------------------------------------------------------
+-spec h5d_get_space_status(Handler::binary()) -> {ok, Status::atom()} | {error, Reason::atom()}.
+h5d_get_space_status(_Handler) ->
+    nif_error(?LINE).
+
 
 nif_error(Line) ->
     exit({nit_library_not_loaded, module, ?MODULE, line, Line}).

@@ -47,6 +47,10 @@ create_dataset(Config) ->
     % create dataset
     {ok, DS} = erlhdf5:h5dcreate(File, "Test_DS", Type, Space, Dcpl),
 
+    {ok, Status} = erlhdf5:h5d_get_space_status(DS),
+
+    ct:log("dataset status, ~p ", [Status]),
+
     % close dataset
     ok = erlhdf5:h5dclose(DS),
     ok.
