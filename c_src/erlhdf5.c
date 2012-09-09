@@ -70,7 +70,10 @@ static ErlNifFunc nif_funcs[] =
   {"h5dcreate", 5, h5dcreate},
   {"h5dclose", 1, h5dclose},
   {"h5d_get_space_status", 1, h5d_get_space_status},
-
+  {"h5dwrite", 1, h5dwrite},
+  {"h5d_get_storage_size", 1, h5d_get_storage_size},
+  //  {"h5dwrite_example", 2, h5dwrite_example}
 };
+
 
 ERL_NIF_INIT(erlhdf5, nif_funcs, &load, NULL, NULL, NULL);

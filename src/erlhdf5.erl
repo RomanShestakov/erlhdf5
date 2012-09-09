@@ -23,7 +23,8 @@
 -export([h5screate_simple/2, h5sclose/1]).
 -export([h5pcreate/1, h5pclose/1]).
 -export([h5tcopy/1, h5tclose/1]).
--export([h5dcreate/5, h5dclose/1, h5d_get_space_status/1]).
+-export([h5dcreate/5, h5dclose/1, h5d_get_space_status/1, h5dwrite/1, h5d_get_storage_size/1]).
+%, h5dwrite_example/2
 
 -include("../include/erlhdf5.hrl").
 
@@ -150,6 +151,26 @@ h5dclose(_Handler) ->
 -spec h5d_get_space_status(Handler::binary()) -> {ok, Status::atom()} | {error, Reason::atom()}.
 h5d_get_space_status(_Handler) ->
     nif_error(?LINE).
+
+
+%% -spec h5dwrite(DSetHandler::binary(), TypeHandler::binary(), DLPHandler::binary()) ->
+%% 		      ok | {error, Reason::atom()}.
+h5dwrite(_DSetHandler) ->
+    nif_error(?LINE).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% Returns the amount of storage allocated for a dataset.
+%% @end
+%%--------------------------------------------------------------------
+-spec h5d_get_storage_size(Handler::binary()) -> {ok, Size::integer()} | {error, Reason::atom()}.
+h5d_get_storage_size(_Handler) ->
+    nif_error(?LINE).
+
+
+%% %%-spec h5dwrite_example(Handler::binary()) -> {ok, Size::integer()} | {error, Reason::atom()}.
+%% h5dwrite_example(_FileHandler, _Space) ->
+%%     nif_error(?LINE).
 
 
 nif_error(Line) ->

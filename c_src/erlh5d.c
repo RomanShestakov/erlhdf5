@@ -25,6 +25,10 @@
 #include "dbg.h"
 #include "erlhdf5.h"
 
+
+#define NX     3                      /* dataset dimensions */
+#define NY     5
+
 //  H5D: Datasets Interface
 
 
@@ -60,7 +64,6 @@ ERL_NIF_TERM h5dcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   Handle* dtype_res;
   Handle* dcpl_res;
   char ds_name[MAXBUFLEN];
-  //char dtype[MAXBUFLEN];
   hid_t file_id;
   hid_t type_id;
   hid_t dataspace_id;
@@ -86,7 +89,8 @@ ERL_NIF_TERM h5dcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   dcpl_id = dcpl_res->id;
 
   // create a new file using default properties
-  ds_id = H5Dcreate(file_id, ds_name, type_id, dataspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+  ds_id = H5Dcreate(file_id, ds_name, type_id, dataspace_id,
+		    H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
   check(ds_id > 0, "Failed to create dataset.");
 
   // create a resource to pass reference to id back to erlang
@@ -151,11 +155,11 @@ ERL_NIF_TERM h5d_get_space_status(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
   err = H5Dget_space_status(ds_id, &space_status);
   check(err == 0, "Failed to get space status.");
 
+  // convert code to string representation
   err = convert_space_status(space_status, space_status_str);
   check(err == 0, "Failed to convert space status %d", space_status);
 
-  //printf( "status string %s \n",  space_status_str);
-
+  // make atom out of string representation
   ret = enif_make_atom(env, space_status_str);
 
   return enif_make_tuple2(env, ATOM_OK, ret);
@@ -163,6 +167,195 @@ ERL_NIF_TERM h5d_get_space_status(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
  error:
   if(ds_id) H5Dclose(ds_id);
 
-  return error_tuple(env, "Can not create dataset");
+  return error_tuple(env, "Can not get dataspace status");
 };
 
+
+// Returns the amount of storage allocated for a dataset.
+ERL_NIF_TERM h5d_get_storage_size(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+  ERL_NIF_TERM ret;
+  Handle* dataset_res;
+  hid_t ds_id;
+  /* H5D_space_status_t      space_status; */
+  /* char space_status_str[MAXBUFLEN]; */
+  hsize_t size;
+  /* herr_t err; */
+
+  // parse arguments
+  check(argc == 1, "Incorrent number of arguments");
+  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &dataset_res) != 0,	\
+	"Can't get dataset resource from argv");
+
+  ds_id = dataset_res->id;
+
+  size = H5Dget_storage_size(ds_id);
+
+  ret = enif_make_int64(env, size);
+
+  return enif_make_tuple2(env, ATOM_OK, ret);
+
+ error:
+  return error_tuple(env, "Can not determine storage size");
+};
+
+
+// creates a new simple dataspace and opens it for access
+ERL_NIF_TERM h5dwrite(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+  //ERL_NIF_TERM ret;
+  //Handle* res;
+  Handle* dataset_res;
+  //Handle* dtype_res;
+  //Handle* dcpl_res;
+  //hid_t type_id;
+  hid_t dataset_id;
+  //hid_t dcpl_id;
+  herr_t err;
+
+  int         data[NX][NY];          /* data to write */
+  int i, j;
+
+  // parse arguments
+  check(argc == 1, "Incorrent number of arguments");
+  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &dataset_res) != 0,	\
+	"Can't get dataset resource from argv");
+  /* check(enif_get_resource(env, argv[1], RES_TYPE, (void**) &dtype_res) != 0,	\ */
+  /* 	"Can't get datatype resource from argv"); */
+  /* check(enif_get_resource(env, argv[2], RES_TYPE, (void**) &dcpl_res) != 0,	\ */
+  /* 	"Can't get properties resource from argv"); */
+  /* check(enif_get_resource(env, argv[3], RES_TYPE, (void**) &dataspace_res) != 0,	\ */
+  /* 	"Can't get dataspace resource from argv"); */
+
+  dataset_id = dataset_res->id;
+  check(dataset_id, "Failed to get dataset handler");
+  /* type_id = dtype_res->id; */
+  /* dcpl_id = dcpl_res->id; */
+
+
+  /*
+   * Initialize data.
+   */
+  for (j = 0; j < NX; j++) {
+    for (i = 0; i < NY; i++)
+      data[j][i] = i + 1 + j*NY;
+  }
+
+
+  // write the data to the dataset
+  err = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+  check(err == 0, "Failed to write into dataset.");
+
+  return ATOM_OK;
+
+ error:
+  //if(ds_id) H5Dclose(ds_id);
+
+  return error_tuple(env, "Can not write into dataset");
+};
+
+
+/* //#define H5FILE_NAME        "SDS.h5" */
+/* #define DATASETNAME "C Matrix" */
+/* /\* #define NX     3                      /\\* dataset dimensions *\\/ *\/ */
+/* /\* #define NY     5 *\/ */
+/* #define RANK   2 */
+
+
+/* // creates a new simple dataspayce and opens it for access */
+/* ERL_NIF_TERM h5dwrite_example(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) */
+/* { */
+
+/*   hid_t       file, dataset;         /\* file and dataset identifiers *\/ */
+/*   hid_t       /\*datatype,*\/ dataspace;   /\* identifiers *\/ */
+/*      /\* hsize_t     dims[2];               /\\* dataset dimensions *\\/ *\/ */
+/*      herr_t      status; */
+/*      int         data[NX][NY];          /\* data to write *\/ */
+/*      int         i, j; */
+
+/*   /\* ERL_NIF_TERM ret; *\/ */
+/*   /\* Handle* res; *\/ */
+/*   Handle* file_res; */
+/*   Handle* dataspace_res; */
+/*   /\* Handle* dtype_res; *\/ */
+/*   /\* Handle* dcpl_res; *\/ */
+/*   /\* char ds_name[MAXBUFLEN]; *\/ */
+/*   //hid_t file; */
+/*   // hid_t type_id; */
+/*   //  hid_t dataspace; */
+/*   //hid_t ds_id; */
+/*   //hid_t dcpl_id; */
+
+
+
+/*      /\* */
+/*       * Data  and output buffer initialization. */
+/*       *\/ */
+/*      for (j = 0; j < NX; j++) { */
+/*         for (i = 0; i < NY; i++) */
+/*             data[j][i] = i + 1 + j*NY; */
+/*      } */
+/*      /\* */
+/*       *  1  2  3  4  5 */
+/*       *  6  7  8  9 10 */
+/*       * 11 12 13 14 15 */
+/*       *\/ */
+
+/*   check(argc == 2, "Incorrent number of arguments"); */
+/*   check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &file_res) != 0,	\ */
+/* 	"Can't get file resource from argv"); */
+
+/*   check(enif_get_resource(env, argv[1], RES_TYPE, (void**) &dataspace_res) != 0,	\ */
+/* 	"Can't get dataspace resource from argv"); */
+
+
+/*   file = file_res->id; */
+/*   dataspace = dataspace_res->id; */
+/*   /\* type_id = dtype_res->id; *\/ */
+/*   /\* dcpl_id = dcpl_res->id; *\/ */
+
+
+/*      /\* */
+/*       * Create a new file using H5F_ACC_TRUNC access, */
+/*       * default file creation properties, and default file */
+/*       * access properties. */
+/*       *\/ */
+/*      //file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT); */
+
+/*      /\* */
+/*       * Describe the size of the array and create the data space for fixed */
+/*       * size dataset. */
+/*       *\/ */
+/*      /\* dims[0] = NX; *\/ */
+/*      /\* dims[1] = NY; *\/ */
+/*      /\* dataspace = H5Screate_simple(RANK, dims, NULL); *\/ */
+
+/*      /\* */
+/*       * Create a new dataset within the file using defined dataspace and */
+/*       * datatype and default dataset creation properties. */
+/*       *\/ */
+/*      dataset = H5Dcreate(file, DATASETNAME, H5T_NATIVE_INT, dataspace, */
+/*                         H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); */
+
+/*      /\* */
+/*       * Write the data to the dataset using default transfer properties. */
+/*       *\/ */
+/*      status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, */
+/*                       H5P_DEFAULT, data); */
+
+/*      /\* */
+/*       * Close/release resources. */
+/*       *\/ */
+/*      H5Sclose(dataspace); */
+/*      H5Dclose(dataset); */
+/*      H5Fclose(file); */
+
+/*      //return 0; */
+/*      return ATOM_OK; */
+
+/*  error: */
+/*   //if(ds_id) H5Dclose(ds_id); */
+
+/*   return error_tuple(env, "Can not write into dataset"); */
+
+/* }; */

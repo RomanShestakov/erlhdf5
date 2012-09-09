@@ -27,6 +27,10 @@
 
 // H5S: Dataspace Interface
 
+#define NX     3                      /* dataset dimensions */
+#define NY     5
+//#define RANK   2
+
 // creates a new simple dataspace and opens it for access
 ERL_NIF_TERM h5screate_simple(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
@@ -37,16 +41,19 @@ ERL_NIF_TERM h5screate_simple(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
   int rank; // number of dimensions of dataspace
   hsize_t* dimsf; // array specifiying the size of each dimension
   int i;
+  int arity;
 
   // parse arguments
   check(argc == 2, "Incorrent number of arguments");
   check(enif_get_int(env, argv[0], &rank ) != 0, "Can't get rank from argv");
-  check(enif_get_tuple(env, argv[1], &rank, &terms) != 0, "Can't get terms from argv");
+  check(enif_get_tuple(env, argv[1], &arity, &terms) != 0, "Can't get terms from argv");
 
   // allocate array of size rank
-  dimsf = (hsize_t*) malloc(rank * sizeof(int));
-  for(i = 0; i < rank; i++) {
-    dimsf[i] = (int)terms[i];
+  dimsf = (hsize_t*) malloc(arity * sizeof(hsize_t));
+  int n;
+  for(i = 0; i < arity; i++) {
+    check(enif_get_int(env, terms[i], &n), "error getting diskspace dimensions");
+    dimsf[i] = n;
   }
 
   // create a new file using default properties
