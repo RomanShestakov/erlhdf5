@@ -34,12 +34,18 @@ end_per_testcase(_TestCase, _Config) ->
 
 all() ->
     [
-     create_dataset
+     h5_write
      %write_example
     ].
 
 
-create_dataset(Config) ->
+
+%%--------------------------------------------------------------------
+%% @doc
+%% h5_write.c
+%% @end
+%%--------------------------------------------------------------------
+h5_write(Config) ->
     File = ?config(file, Config),
     Space = ?config(space, Config),
     Dcpl = ?config(dcpl, Config),

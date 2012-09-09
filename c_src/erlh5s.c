@@ -53,7 +53,7 @@ ERL_NIF_TERM h5screate_simple(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
   int n;
   for(i = 0; i < arity; i++) {
     check(enif_get_int(env, terms[i], &n), "error getting diskspace dimensions");
-    dimsf[i] = n;
+    dimsf[i] = (hsize_t)n;
   }
 
   // create a new file using default properties
