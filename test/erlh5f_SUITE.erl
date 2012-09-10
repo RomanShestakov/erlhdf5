@@ -10,7 +10,7 @@ suite() ->
 
 init_per_suite(Config) ->
     {ok, File} = erlhdf5:h5fcreate("test_file_hdf5.h5", 'H5F_ACC_TRUNC'),
-    {ok, Space} = erlhdf5:h5screate_simple(2, {3, 5}),
+    {ok, Space} = erlhdf5:h5screate_simple(1, {100}),
     {ok, Dcpl} = erlhdf5:h5pcreate('H5P_DATASET_CREATE'),
     {ok, Type} = erlhdf5:h5tcopy('H5T_NATIVE_INT'),
     [{file, File}, {space, Space}, {dcpl, Dcpl}, {type, Type} | Config].
@@ -59,7 +59,7 @@ h5_write(Config) ->
     ct:log("dataset status: ~p, size: ~p ", [Status, Size]),
 
     %write some data into dataset
-    ok = erlhdf5:h5dwrite(DS),
+    ok = erlhdf5:h5dwrite(DS, [1,2,3,4,5,6,7,8,9]),
 
     {ok, Status1} = erlhdf5:h5d_get_space_status(DS),
     {ok, Size1} = erlhdf5:h5d_get_storage_size(DS),

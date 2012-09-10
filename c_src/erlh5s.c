@@ -27,10 +27,6 @@
 
 // H5S: Dataspace Interface
 
-#define NX     3                      /* dataset dimensions */
-#define NY     5
-//#define RANK   2
-
 // creates a new simple dataspace and opens it for access
 ERL_NIF_TERM h5screate_simple(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
@@ -47,6 +43,8 @@ ERL_NIF_TERM h5screate_simple(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
   check(argc == 2, "Incorrent number of arguments");
   check(enif_get_int(env, argv[0], &rank ) != 0, "Can't get rank from argv");
   check(enif_get_tuple(env, argv[1], &arity, &terms) != 0, "Can't get terms from argv");
+  // make sure that rank is matching arity
+  check(arity == rank, "arity does not match rank");
 
   // allocate array of size rank
   dimsf = (hsize_t*) malloc(arity * sizeof(hsize_t));

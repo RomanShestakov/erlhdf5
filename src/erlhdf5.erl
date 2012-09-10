@@ -23,7 +23,7 @@
 -export([h5screate_simple/2, h5sclose/1]).
 -export([h5pcreate/1, h5pclose/1]).
 -export([h5tcopy/1, h5tclose/1]).
--export([h5dcreate/5, h5dclose/1, h5d_get_space_status/1, h5dwrite/1, h5d_get_storage_size/1]).
+-export([h5dcreate/5, h5dclose/1, h5d_get_space_status/1, h5dwrite/2, h5d_get_storage_size/1]).
 %, h5dwrite_example/2
 
 -include("../include/erlhdf5.hrl").
@@ -155,7 +155,7 @@ h5d_get_space_status(_Handler) ->
 
 %% -spec h5dwrite(DSetHandler::binary(), TypeHandler::binary(), DLPHandler::binary()) ->
 %% 		      ok | {error, Reason::atom()}.
-h5dwrite(_DSetHandler) ->
+h5dwrite(_DSetHandler, _Data) ->
     nif_error(?LINE).
 
 %%--------------------------------------------------------------------

@@ -212,14 +212,34 @@ ERL_NIF_TERM h5dwrite(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   hid_t dataset_id;
   //hid_t dcpl_id;
   herr_t err;
+  ERL_NIF_TERM list;
+  unsigned int list_length;
 
-  int         data[NX][NY];          /* data to write */
-  int i, j;
+  int *data;          /* data to write */
+  int i; //, j;
+  ERL_NIF_TERM head, tail;
 
   // parse arguments
-  check(argc == 1, "Incorrent number of arguments");
+  check(argc == 2, "Incorrent number of arguments");
   check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &dataset_res) != 0,	\
 	"Can't get dataset resource from argv");
+
+  list = argv[1];
+  check(enif_get_list_length(env, list, &list_length), "empty data");
+
+  // allocate space for array to hold elements of list
+  data = (int*) malloc(list_length * sizeof(int));
+
+  //int n;
+  while(enif_get_list_cell(env, list, &head, &tail)) {
+    check(enif_get_int(env, head, &data[i]), "incorrect type of list element");
+    i++;
+    list = tail;
+  }
+
+  /* check(enif_get_resource(env, argv[1], RES_TYPE, (void**) &dtype_res) != 0,	\ */
+  /* 	"Can't get datatype resource from argv"); */
+
   /* check(enif_get_resource(env, argv[1], RES_TYPE, (void**) &dtype_res) != 0,	\ */
   /* 	"Can't get datatype resource from argv"); */
   /* check(enif_get_resource(env, argv[2], RES_TYPE, (void**) &dcpl_res) != 0,	\ */
@@ -233,23 +253,25 @@ ERL_NIF_TERM h5dwrite(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   /* dcpl_id = dcpl_res->id; */
 
 
-  /*
-   * Initialize data.
-   */
-  for (j = 0; j < NX; j++) {
-    for (i = 0; i < NY; i++)
-      data[j][i] = i + 1 + j*NY;
-  }
+  /* /\* */
+  /*  * Initialize data. */
+  /*  *\/ */
+  /* for (j = 0; j < NX; j++) { */
+  /*   for (i = 0; i < NY; i++) */
+  /*     data[j][i] = i + 1 + j*NY; */
+  /* } */
 
 
   // write the data to the dataset
   err = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
   check(err == 0, "Failed to write into dataset.");
 
+  free(data);
+
   return ATOM_OK;
 
  error:
-  //if(ds_id) H5Dclose(ds_id);
+  if(data) free(data);
 
   return error_tuple(env, "Can not write into dataset");
 };
