@@ -23,7 +23,7 @@
 -export([h5screate_simple/2, h5sclose/1]).
 -export([h5pcreate/1, h5pclose/1]).
 -export([h5tcopy/1, h5tclose/1]).
--export([h5dcreate/5, h5dclose/1, h5d_get_space_status/1, h5dwrite/2, h5d_get_storage_size/1]).
+-export([h5dcreate/5, h5dopen/2, h5dclose/1, h5d_get_space_status/1, h5dwrite/2, h5d_get_storage_size/1]).
 %, h5dwrite_example/2
 
 -include("../include/erlhdf5.hrl").
@@ -132,6 +132,16 @@ h5tclose(_Handler) ->
 -spec h5dcreate(File::binary(), Name::string(), Type::binary(), Space::binary(), Prop::binary()) ->
 		       {ok, binary()} | {error, atom()}.
 h5dcreate(_File, _Name, _Type, _Space, _Prop) ->
+    nif_error(?LINE).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% Opens an existing dataset.
+%% @end
+%%--------------------------------------------------------------------
+-spec h5dopen(File::binary(), Name::string()) ->
+		       {ok, binary()} | {error, atom()}.
+h5dopen(_File, _Name) ->
     nif_error(?LINE).
 
 %%--------------------------------------------------------------------

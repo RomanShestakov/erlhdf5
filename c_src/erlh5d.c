@@ -25,12 +25,7 @@
 #include "dbg.h"
 #include "erlhdf5.h"
 
-
-#define NX     3                      /* dataset dimensions */
-#define NY     5
-
 //  H5D: Datasets Interface
-
 
 // protype
 static herr_t convert_space_status(H5D_space_status_t,  char*);
@@ -103,14 +98,54 @@ ERL_NIF_TERM h5dcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
   // cleanup
   enif_release_resource(res);
-
   return enif_make_tuple2(env, ATOM_OK, ret);
 
  error:
   if(ds_id) H5Dclose(ds_id);
-
   return error_tuple(env, "Can not create dataset");
 };
+
+// Opens an existing dataset.
+ERL_NIF_TERM h5dopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+  ERL_NIF_TERM ret;
+  Handle* res;
+  Handle* file_res;
+  char ds_name[MAXBUFLEN];
+  hid_t file_id;
+  hid_t ds_id;
+
+  // parse arguments
+  check(argc == 2, "Incorrent number of arguments");
+  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &file_res) != 0,	\
+	"Can't get file resource from argv");
+  check(enif_get_string(env, argv[1], ds_name, sizeof(ds_name), ERL_NIF_LATIN1) != 0, \
+	"Can't get dataset name from argv");
+
+  file_id = file_res->id;
+
+  // create a new file using default properties
+  ds_id = H5Dopen(file_id, ds_name, H5P_DEFAULT);
+  check(ds_id > 0, "Failed to create dataset.");
+
+  // create a resource to pass reference to id back to erlang
+  res = enif_alloc_resource(RES_TYPE, sizeof(Handle));
+  check(res, "Failed to allocate resource for dataset %s", "Handle");
+
+  // add ref to resource
+  res->id = ds_id;
+  ret = enif_make_resource(env, res);
+
+  // cleanup
+  enif_release_resource(res);
+  return enif_make_tuple2(env, ATOM_OK, ret);
+
+ error:
+  if(ds_id) H5Dclose(ds_id);
+  return error_tuple(env, "Can not create dataset");
+};
+
+
 
 // close
 ERL_NIF_TERM h5dclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
@@ -126,7 +161,6 @@ ERL_NIF_TERM h5dclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   // close properties list
   err = H5Dclose(res->id);
   check(err == 0, "Failed to close dataset.");
-
   return ATOM_OK;
 
  error:
@@ -161,12 +195,10 @@ ERL_NIF_TERM h5d_get_space_status(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
 
   // make atom out of string representation
   ret = enif_make_atom(env, space_status_str);
-
   return enif_make_tuple2(env, ATOM_OK, ret);
 
  error:
   if(ds_id) H5Dclose(ds_id);
-
   return error_tuple(env, "Can not get dataspace status");
 };
 
@@ -188,11 +220,8 @@ ERL_NIF_TERM h5d_get_storage_size(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
 	"Can't get dataset resource from argv");
 
   ds_id = dataset_res->id;
-
   size = H5Dget_storage_size(ds_id);
-
   ret = enif_make_int64(env, size);
-
   return enif_make_tuple2(env, ATOM_OK, ret);
 
  error:
@@ -270,7 +299,6 @@ ERL_NIF_TERM h5dwrite(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
  error:
   if(data) freeArray(data, list_length);
-
   return error_tuple(env, "Can not write into dataset");
 };
 

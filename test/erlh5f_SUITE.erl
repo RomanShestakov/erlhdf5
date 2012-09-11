@@ -9,35 +9,47 @@ suite() ->
     [{timetrap,{seconds, 60}}].
 
 init_per_suite(Config) ->
-    {ok, File} = erlhdf5:h5fcreate("test_file_hdf5.h5", 'H5F_ACC_TRUNC'),
+    %% create a data file
+    {ok, File} = erlhdf5:h5fcreate("hdf5.h5", 'H5F_ACC_TRUNC'),
     %% 2d array with 3 columns
     {ok, Space} = erlhdf5:h5screate_simple(2, {100, 3}),
     {ok, Dcpl} = erlhdf5:h5pcreate('H5P_DATASET_CREATE'),
     {ok, Type} = erlhdf5:h5tcopy('H5T_NATIVE_INT'),
-    [{file, File}, {space, Space}, {dcpl, Dcpl}, {type, Type} | Config].
+    %% create new dataset
+    {ok, DS} = erlhdf5:h5dcreate(File, "/dset", Type, Space, Dcpl),
 
-end_per_suite(Config) ->
-    File = ?config(file, Config),
-    Space = ?config(space, Config),
-    Dcpl = ?config(dcpl, Config),
-    Type = ?config(type, Config),
-    ok = erlhdf5:h5fclose(File),
+    %% close resources
     ok = erlhdf5:h5sclose(Space),
     ok = erlhdf5:h5pclose(Dcpl),
     ok = erlhdf5:h5tclose(Type),
+    ok = erlhdf5:h5dclose(DS),
+    [{file, File} | Config].
+
+end_per_suite(Config) ->
+    File = ?config(file, Config),
+    ok = erlhdf5:h5fclose(File),
     ok.
 
 init_per_testcase(_TestCase, Config) ->
-    Config.
+    File = ?config(file, Config),
+    %% open existing dataset
+    {ok, DS} = erlhdf5:h5dopen(File, "/dset"),
+    [{file, File}, {dataset, DS} | Config].
 
-end_per_testcase(_TestCase, _Config) ->
+end_per_testcase(_TestCase, Config) ->
+    DS = ?config(dataset, Config),
+    ok = erlhdf5:h5dclose(DS),
     ok.
 
 all() ->
     [
+
      h5_write
      %write_example
     ].
+
+
+%%dataset_create(Config) ->
 
 
 
@@ -47,14 +59,7 @@ all() ->
 %% @end
 %%--------------------------------------------------------------------
 h5_write(Config) ->
-    File = ?config(file, Config),
-    Space = ?config(space, Config),
-    Dcpl = ?config(dcpl, Config),
-    Type = ?config(type, Config),
-
-    % create dataset
-    {ok, DS} = erlhdf5:h5dcreate(File, "/dset", Type, Space, Dcpl),
-
+    DS = ?config(dataset, Config),
     {ok, Status} = erlhdf5:h5d_get_space_status(DS),
     {ok, Size} = erlhdf5:h5d_get_storage_size(DS),
     ct:log("dataset status: ~p, size: ~p ", [Status, Size]),
@@ -65,9 +70,6 @@ h5_write(Config) ->
     {ok, Status1} = erlhdf5:h5d_get_space_status(DS),
     {ok, Size1} = erlhdf5:h5d_get_storage_size(DS),
     ct:log("dataset status after write: ~p, size: ~p ", [Status1, Size1]),
-
-    % close dataset
-    ok = erlhdf5:h5dclose(DS),
     ok.
 
 %% write_example(_Config) ->
