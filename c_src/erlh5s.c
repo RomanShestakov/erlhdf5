@@ -44,7 +44,7 @@ ERL_NIF_TERM h5screate_simple(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
   check(enif_get_int(env, argv[0], &rank ) != 0, "Can't get rank from argv");
   check(enif_get_tuple(env, argv[1], &arity, &terms) != 0, "Can't get terms from argv");
   // make sure that rank is matching arity
-  check(arity == rank, "arity does not match rank");
+  check(rank <= 2, "does not support > 2 dimensions");
 
   // allocate array of size rank
   dimsf = (hsize_t*) malloc(arity * sizeof(hsize_t));

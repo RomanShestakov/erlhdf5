@@ -34,7 +34,7 @@
 
 // protype
 static herr_t convert_space_status(H5D_space_status_t,  char*);
-
+static void freeArray(int **a, int length);
 // convert
 static herr_t convert_space_status(H5D_space_status_t space_status,  char* space_status_str)
 {
@@ -214,10 +214,14 @@ ERL_NIF_TERM h5dwrite(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   herr_t err;
   ERL_NIF_TERM list;
   unsigned int list_length;
+  int arity;//, rank;
 
-  int *data;          /* data to write */
-  int i; //, j;
+  //int *data;          /* data to write */
+  int i = 0, j = 0;
   ERL_NIF_TERM head, tail;
+  const ERL_NIF_TERM *terms;
+
+  //check(enif_get_tuple(env, argv[1], &arity, &terms) != 0, "Can't get terms from argv");
 
   // parse arguments
   check(argc == 2, "Incorrent number of arguments");
@@ -225,14 +229,20 @@ ERL_NIF_TERM h5dwrite(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 	"Can't get dataset resource from argv");
 
   list = argv[1];
+
+  // get the dimentions of list: lenght of list and arity of tuples (elements), all elements must be the same size
   check(enif_get_list_length(env, list, &list_length), "empty data");
-
   // allocate space for array to hold elements of list
-  data = (int*) malloc(list_length * sizeof(int));
-
-  //int n;
+  int **data = malloc(list_length * sizeof(int *));
+  check(data, "can't allocate mem");
+  // go through each list element and unpack it
   while(enif_get_list_cell(env, list, &head, &tail)) {
-    check(enif_get_int(env, head, &data[i]), "incorrect type of list element");
+    check(enif_get_tuple(env, head, &arity, &terms) != 0, "Can't get elements from the list");
+    data[i] = malloc(arity * sizeof(int));
+    check(data[i], "can't allocate mem");
+    for(j = 0; j < arity; j++) {
+      check(enif_get_int(env, terms[j], &data[i][j]), "error upacking an element");
+    }
     i++;
     list = tail;
   }
@@ -249,33 +259,29 @@ ERL_NIF_TERM h5dwrite(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
   dataset_id = dataset_res->id;
   check(dataset_id, "Failed to get dataset handler");
-  /* type_id = dtype_res->id; */
-  /* dcpl_id = dcpl_res->id; */
-
-
-  /* /\* */
-  /*  * Initialize data. */
-  /*  *\/ */
-  /* for (j = 0; j < NX; j++) { */
-  /*   for (i = 0; i < NY; i++) */
-  /*     data[j][i] = i + 1 + j*NY; */
-  /* } */
-
 
   // write the data to the dataset
   err = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
   check(err == 0, "Failed to write into dataset.");
 
-  free(data);
-
+  // free mem
+  freeArray(data, list_length);
   return ATOM_OK;
 
  error:
-  if(data) free(data);
+  if(data) freeArray(data, list_length);
 
   return error_tuple(env, "Can not write into dataset");
 };
 
+// free mem
+static void freeArray(int **a, int length) {
+  int i;
+  for(i = 0; i < length; i++) {
+    free(a[i]);
+  }
+  free(a);
+};
 
 /* //#define H5FILE_NAME        "SDS.h5" */
 /* #define DATASETNAME "C Matrix" */
