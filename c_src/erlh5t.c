@@ -78,12 +78,10 @@ ERL_NIF_TERM h5tcopy(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
   // cleanup
   enif_release_resource(res);
-
   return enif_make_tuple2(env, ATOM_OK, ret);
 
  error:
   if(type_id) H5Tclose(type_id);
-
   return error_tuple(env, "Can not copy type");
 };
 
@@ -102,9 +100,31 @@ ERL_NIF_TERM h5tclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   // close properties list
   err = H5Tclose(res->id);
   check(err == 0, "Failed to close type.");
-
   return ATOM_OK;
 
  error:
   return error_tuple(env, "Can not close type");
+};
+
+// Returns the datatype class identifier.
+ERL_NIF_TERM h5tget_class(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+  Handle* res;
+  ERL_NIF_TERM ret;
+  H5T_class_t class_id;
+
+  // parse arguments
+  check(argc == 1, "Incorrent number of arguments");
+  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &res) != 0,	\
+	"Can't get resource from argv");
+
+  class_id = H5Tget_class(res->id);
+  //fprintf(stderr, "class type: %d\r\n", class_id);
+  check(class_id != H5T_NO_CLASS, "Failed to get type class.");
+
+  ret = enif_make_int(env, class_id);
+  return enif_make_tuple2(env, ATOM_OK, ret);
+
+ error:
+  return error_tuple(env, "Can not get type class");
 };

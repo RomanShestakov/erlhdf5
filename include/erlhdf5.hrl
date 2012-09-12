@@ -3,4 +3,15 @@
 -define('H5F_ACC_RDWR', 'H5F_ACC_RDWR').
 -define('H5F_ACC_RDONLY', 'H5F_ACC_RDONLY').
 -define('H5P_DATASET_CREATE', 'H5P_DATASET_CREATE').
-
+-define('H5T_NO_CLASS', -1).
+-define('H5T_INTEGER', 0).
+-define('H5T_FLOAT', 1).
+-define('H5T_TIME', 2).
+-define('H5T_STRING', 3).
+-define('H5T_BITFIELD', 4).
+-define('H5T_OPAQUE', 5).
+-define('H5T_COMPOUND', 6).
+-define('H5T_REFERENCE', 7).
+-define('H5T_ENUM', 8).
+-define('H5T_VLEN', 9).
+-define('H5T_ARRAY', 10).

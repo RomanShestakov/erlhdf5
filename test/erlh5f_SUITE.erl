@@ -77,8 +77,9 @@ h5_read(Config) ->
     DS = ?config(dataset, Config),
 
     {ok, Type} = erlhdf5:h5dget_type(DS),
-    %% ct:log("dataset status after write: ~p, size: ~p ", [Status1, Size1]),
-
+    {ok, Class} = erlhdf5:h5tget_class(Type),
+    Class = ?H5T_INTEGER,
+    ct:log("Class Type: ~p", [Class]),
     ok = erlhdf5:h5tclose(Type),
     ok.
 
