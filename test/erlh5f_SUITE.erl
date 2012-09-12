@@ -43,15 +43,10 @@ end_per_testcase(_TestCase, Config) ->
 
 all() ->
     [
-
-     h5_write
+     h5_write,
+     h5_read
      %write_example
     ].
-
-
-%%dataset_create(Config) ->
-
-
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -71,6 +66,22 @@ h5_write(Config) ->
     {ok, Size1} = erlhdf5:h5d_get_storage_size(DS),
     ct:log("dataset status after write: ~p, size: ~p ", [Status1, Size1]),
     ok.
+
+
+%%--------------------------------------------------------------------
+%% @doc
+%% h5_read.c
+%% @end
+%%--------------------------------------------------------------------
+h5_read(Config) ->
+    DS = ?config(dataset, Config),
+
+    {ok, Type} = erlhdf5:h5dget_type(DS),
+    %% ct:log("dataset status after write: ~p, size: ~p ", [Status1, Size1]),
+
+    ok = erlhdf5:h5tclose(Type),
+    ok.
+
 
 %% write_example(_Config) ->
 %%     %% File = ?config(file, Config),

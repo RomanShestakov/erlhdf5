@@ -146,7 +146,6 @@ ERL_NIF_TERM h5dopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 };
 
 
-
 // close
 ERL_NIF_TERM h5dclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
@@ -209,10 +208,7 @@ ERL_NIF_TERM h5d_get_storage_size(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
   ERL_NIF_TERM ret;
   Handle* dataset_res;
   hid_t ds_id;
-  /* H5D_space_status_t      space_status; */
-  /* char space_status_str[MAXBUFLEN]; */
   hsize_t size;
-  /* herr_t err; */
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
@@ -229,28 +225,52 @@ ERL_NIF_TERM h5d_get_storage_size(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
 };
 
 
+// Returns an identifier for a copy of the datatype for a dataset.
+ERL_NIF_TERM h5dget_type(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+  Handle* res;
+  ERL_NIF_TERM ret;
+  Handle* dataset_res;
+  hid_t ds_id;
+  hid_t type_id;
+
+  // parse arguments
+  check(argc == 1, "Incorrent number of arguments");
+  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &dataset_res) != 0,	\
+	"Can't get dataset resource from argv");
+
+  ds_id = dataset_res->id;
+  type_id = H5Dget_type(ds_id);
+
+  // create a resource to pass reference to id back to erlang
+  res = enif_alloc_resource(RES_TYPE, sizeof(Handle));
+  check(res, "Failed to allocate resource for dataset %s", "Handle");
+
+  // add ref to resource
+  res->id = type_id;
+  ret = enif_make_resource(env, res);
+
+  // cleanup
+  enif_release_resource(res);
+  return enif_make_tuple2(env, ATOM_OK, ret);
+
+ error:
+  return error_tuple(env, "Can not determine storage size");
+};
+
+
 // creates a new simple dataspace and opens it for access
 ERL_NIF_TERM h5dwrite(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-  //ERL_NIF_TERM ret;
-  //Handle* res;
   Handle* dataset_res;
-  //Handle* dtype_res;
-  //Handle* dcpl_res;
-  //hid_t type_id;
   hid_t dataset_id;
-  //hid_t dcpl_id;
   herr_t err;
   ERL_NIF_TERM list;
   unsigned int list_length;
   int arity;//, rank;
-
-  //int *data;          /* data to write */
   int i = 0, j = 0;
   ERL_NIF_TERM head, tail;
   const ERL_NIF_TERM *terms;
-
-  //check(enif_get_tuple(env, argv[1], &arity, &terms) != 0, "Can't get terms from argv");
 
   // parse arguments
   check(argc == 2, "Incorrent number of arguments");
@@ -275,16 +295,6 @@ ERL_NIF_TERM h5dwrite(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     i++;
     list = tail;
   }
-
-  /* check(enif_get_resource(env, argv[1], RES_TYPE, (void**) &dtype_res) != 0,	\ */
-  /* 	"Can't get datatype resource from argv"); */
-
-  /* check(enif_get_resource(env, argv[1], RES_TYPE, (void**) &dtype_res) != 0,	\ */
-  /* 	"Can't get datatype resource from argv"); */
-  /* check(enif_get_resource(env, argv[2], RES_TYPE, (void**) &dcpl_res) != 0,	\ */
-  /* 	"Can't get properties resource from argv"); */
-  /* check(enif_get_resource(env, argv[3], RES_TYPE, (void**) &dataspace_res) != 0,	\ */
-  /* 	"Can't get dataspace resource from argv"); */
 
   dataset_id = dataset_res->id;
   check(dataset_id, "Failed to get dataset handler");
