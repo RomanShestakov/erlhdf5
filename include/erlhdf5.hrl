@@ -15,3 +15,10 @@
 -define('H5T_ENUM', 8).
 -define('H5T_VLEN', 9).
 -define('H5T_ARRAY', 10).
+
+-define('H5T_ORDER_LE', 0).
+-define('H5T_ORDER_BE', 1).
+-define('H5T_ORDER_VAX', 2).
+-define('H5T_ORDER_MIXED', 3).
+-define('H5T_ORDER_NONE', 4).
+-define('H5T_ORDER_ERROR', -1).

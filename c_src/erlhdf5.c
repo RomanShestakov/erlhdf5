@@ -68,6 +68,7 @@ static ErlNifFunc nif_funcs[] =
   {"h5tcopy", 1, h5tcopy},
   {"h5tclose", 1, h5tclose},
   {"h5tget_class", 1, h5tget_class},
+  {"h5tget_order", 1, h5tget_order},
   {"h5dcreate", 5, h5dcreate},
   {"h5dopen", 2, h5dopen},
   {"h5dclose", 1, h5dclose},

@@ -80,6 +80,12 @@ h5_read(Config) ->
     {ok, Class} = erlhdf5:h5tget_class(Type),
     Class = ?H5T_INTEGER,
     ct:log("Class Type: ~p", [Class]),
+
+    {ok, Order} = erlhdf5:h5tget_order(Type),
+    Order = ?H5T_ORDER_LE,
+    ct:log("Order: ~p", [Order]),
+
+    %% close resources
     ok = erlhdf5:h5tclose(Type),
     ok.
 

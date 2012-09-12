@@ -128,3 +128,25 @@ ERL_NIF_TERM h5tget_class(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
  error:
   return error_tuple(env, "Can not get type class");
 };
+
+// Returns the byte order of an atomic datatype.
+ERL_NIF_TERM h5tget_order(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+  Handle* res;
+  ERL_NIF_TERM ret;
+  H5T_order_t order;
+
+  // parse arguments
+  check(argc == 1, "Incorrent number of arguments");
+  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &res) != 0,	\
+	"Can't get resource from argv");
+
+  order = H5Tget_order(res->id);
+  check(order != H5T_ORDER_ERROR, "Failed to get order.");
+
+  ret = enif_make_int(env, order);
+  return enif_make_tuple2(env, ATOM_OK, ret);
+
+ error:
+  return error_tuple(env, "Can not get order");
+};

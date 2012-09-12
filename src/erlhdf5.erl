@@ -22,7 +22,7 @@
 -export([h5fcreate/2, h5fopen/2, h5fclose/1]).
 -export([h5screate_simple/2, h5sclose/1]).
 -export([h5pcreate/1, h5pclose/1]).
--export([h5tcopy/1, h5tclose/1, h5tget_class/1]).
+-export([h5tcopy/1, h5tclose/1, h5tget_class/1, h5tget_order/1]).
 -export([h5dcreate/5, h5dopen/2, h5dclose/1, h5dget_type/1, h5d_get_space_status/1, h5dwrite/2, h5d_get_storage_size/1]).
 %, h5dwrite_example/2
 
@@ -130,6 +130,15 @@ h5tclose(_Handler) ->
 %%--------------------------------------------------------------------
 -spec h5tget_class(Handler::binary()) -> ok | {error, Reason::atom()}.
 h5tget_class(_Handler) ->
+    nif_error(?LINE).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% Returns the byte order of an atomic datatype.
+%% @end
+%%--------------------------------------------------------------------
+-spec h5tget_order(Handler::binary()) -> {ok, integer} | {error, Reason::atom()}.
+h5tget_order(_Handler) ->
     nif_error(?LINE).
 
 %%--------------------------------------------------------------------
