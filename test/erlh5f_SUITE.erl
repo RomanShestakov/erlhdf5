@@ -85,6 +85,11 @@ h5_read(Config) ->
     Order = ?H5T_ORDER_LE,
     ct:log("Order: ~p", [Order]),
 
+    {ok, Size} = erlhdf5:h5tget_size(Type),
+    ct:log("Size: ~p", [Size]),
+
+    {ok, _Dataspace} = erlhdf5:h5dget_space(DS),
+
     %% close resources
     ok = erlhdf5:h5tclose(Type),
     ok.

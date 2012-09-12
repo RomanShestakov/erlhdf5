@@ -321,6 +321,30 @@ static void freeArray(int **a, int length) {
   free(a);
 };
 
+
+// Returns an identifier for a copy of the dataspace for a dataset.
+ERL_NIF_TERM h5dget_space(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+  ERL_NIF_TERM ret;
+  Handle* dataset_res;
+  hid_t space_id;
+
+  // parse arguments
+  check(argc == 1, "Incorrent number of arguments");
+  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &dataset_res) != 0,	\
+	"Can't get dataset resource from argv");
+
+  space_id = H5Dget_space(dataset_res->id);
+  check(space_id >= 0, "Failed to get space.");
+
+  ret = enif_make_int(env, space_id);
+  return enif_make_tuple2(env, ATOM_OK, ret);
+
+ error:
+  return error_tuple(env, "Can not get space id");
+};
+
+
 /* //#define H5FILE_NAME        "SDS.h5" */
 /* #define DATASETNAME "C Matrix" */
 /* /\* #define NX     3                      /\\* dataset dimensions *\\/ *\/ */
