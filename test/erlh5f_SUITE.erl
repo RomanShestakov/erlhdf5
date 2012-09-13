@@ -9,7 +9,7 @@ suite() ->
     [{timetrap,{seconds, 60}}].
 
 init_per_suite(Config) ->
-    %% create a data file
+    %% create / close data file
     {ok, File} = erlhdf5:h5fcreate("hdf5.h5", 'H5F_ACC_TRUNC'),
     %% 2d array with 3 columns
     {ok, Space} = erlhdf5:h5screate_simple(2, {100, 3}),

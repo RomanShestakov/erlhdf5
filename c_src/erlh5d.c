@@ -53,10 +53,7 @@ static herr_t convert_space_status(H5D_space_status_t space_status,  char* space
 ERL_NIF_TERM h5dcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   ERL_NIF_TERM ret;
-  Handle* res;
-  Handle* file_res;
   Handle* dataspace_res;
-  Handle* dtype_res;
   Handle* dcpl_res;
   char ds_name[MAXBUFLEN];
   hid_t file_id;
@@ -67,20 +64,18 @@ ERL_NIF_TERM h5dcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
   // parse arguments
   check(argc == 5, "Incorrent number of arguments");
-  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &file_res) != 0,	\
+  check(enif_get_int(env, argv[0], &file_id) != 0,	\
 	"Can't get file resource from argv");
   check(enif_get_string(env, argv[1], ds_name, sizeof(ds_name), ERL_NIF_LATIN1) != 0, \
 	"Can't get dataset name from argv");
-  check(enif_get_resource(env, argv[2], RES_TYPE, (void**) &dtype_res) != 0,	\
+  check(enif_get_int(env, argv[2], &type_id) != 0,	\
 	"Can't get datatype resource from argv");
   check(enif_get_resource(env, argv[3], RES_TYPE, (void**) &dataspace_res) != 0,	\
 	"Can't get dataspace resource from argv");
   check(enif_get_resource(env, argv[4], RES_TYPE, (void**) &dcpl_res) != 0,	\
 	"Can't get properties resource from argv");
 
-  file_id = file_res->id;
   dataspace_id = dataspace_res->id;
-  type_id = dtype_res->id;
   dcpl_id = dcpl_res->id;
 
   // create a new file using default properties
@@ -88,16 +83,7 @@ ERL_NIF_TERM h5dcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 		    H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
   check(ds_id > 0, "Failed to create dataset.");
 
-  // create a resource to pass reference to id back to erlang
-  res = enif_alloc_resource(RES_TYPE, sizeof(Handle));
-  check(res, "Failed to allocate resource for dataset %s", "Handle");
-
-  // add ref to resource
-  res->id = ds_id;
-  ret = enif_make_resource(env, res);
-
-  // cleanup
-  enif_release_resource(res);
+  ret = enif_make_int(env, ds_id);
   return enif_make_tuple2(env, ATOM_OK, ret);
 
  error:
@@ -109,35 +95,22 @@ ERL_NIF_TERM h5dcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM h5dopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   ERL_NIF_TERM ret;
-  Handle* res;
-  Handle* file_res;
   char ds_name[MAXBUFLEN];
   hid_t file_id;
   hid_t ds_id;
 
   // parse arguments
   check(argc == 2, "Incorrent number of arguments");
-  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &file_res) != 0,	\
+  check(enif_get_int(env, argv[0], &file_id) != 0,	\
 	"Can't get file resource from argv");
   check(enif_get_string(env, argv[1], ds_name, sizeof(ds_name), ERL_NIF_LATIN1) != 0, \
 	"Can't get dataset name from argv");
-
-  file_id = file_res->id;
 
   // create a new file using default properties
   ds_id = H5Dopen(file_id, ds_name, H5P_DEFAULT);
   check(ds_id > 0, "Failed to create dataset.");
 
-  // create a resource to pass reference to id back to erlang
-  res = enif_alloc_resource(RES_TYPE, sizeof(Handle));
-  check(res, "Failed to allocate resource for dataset %s", "Handle");
-
-  // add ref to resource
-  res->id = ds_id;
-  ret = enif_make_resource(env, res);
-
-  // cleanup
-  enif_release_resource(res);
+  ret = enif_make_int(env, ds_id);
   return enif_make_tuple2(env, ATOM_OK, ret);
 
  error:
@@ -149,16 +122,16 @@ ERL_NIF_TERM h5dopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 // close
 ERL_NIF_TERM h5dclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-  Handle* res;
   herr_t err;
+  hid_t ds_id;
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &res) != 0,	\
+  check(enif_get_int(env, argv[0], &ds_id) != 0,	\
 	"Can't get resource from argv");
 
   // close properties list
-  err = H5Dclose(res->id);
+  err = H5Dclose(ds_id);
   check(err == 0, "Failed to close dataset.");
   return ATOM_OK;
 
@@ -171,7 +144,6 @@ ERL_NIF_TERM h5dclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM h5d_get_space_status(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   ERL_NIF_TERM ret;
-  Handle* dataset_res;
   hid_t ds_id;
   H5D_space_status_t      space_status;
   char space_status_str[MAXBUFLEN];
@@ -179,10 +151,8 @@ ERL_NIF_TERM h5d_get_space_status(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &dataset_res) != 0,	\
+  check(enif_get_int(env, argv[0], &ds_id) != 0,	\
 	"Can't get dataset resource from argv");
-
-  ds_id = dataset_res->id;
 
   // create a new file using default properties
   err = H5Dget_space_status(ds_id, &space_status);
@@ -206,16 +176,13 @@ ERL_NIF_TERM h5d_get_space_status(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
 ERL_NIF_TERM h5d_get_storage_size(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   ERL_NIF_TERM ret;
-  Handle* dataset_res;
   hid_t ds_id;
   hsize_t size;
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &dataset_res) != 0,	\
-	"Can't get dataset resource from argv");
+  check(enif_get_int(env, argv[0], &ds_id) != 0, "Can't get dataset resource from argv");
 
-  ds_id = dataset_res->id;
   size = H5Dget_storage_size(ds_id);
   ret = enif_make_int64(env, size);
   return enif_make_tuple2(env, ATOM_OK, ret);
@@ -228,30 +195,17 @@ ERL_NIF_TERM h5d_get_storage_size(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
 // Returns an identifier for a copy of the datatype for a dataset.
 ERL_NIF_TERM h5dget_type(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-  Handle* res;
   ERL_NIF_TERM ret;
-  Handle* dataset_res;
   hid_t ds_id;
   hid_t type_id;
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &dataset_res) != 0,	\
-	"Can't get dataset resource from argv");
+  check(enif_get_int(env, argv[0], &ds_id) != 0, "Can't get dataset resource from argv");
 
-  ds_id = dataset_res->id;
   type_id = H5Dget_type(ds_id);
 
-  // create a resource to pass reference to id back to erlang
-  res = enif_alloc_resource(RES_TYPE, sizeof(Handle));
-  check(res, "Failed to allocate resource for dataset %s", "Handle");
-
-  // add ref to resource
-  res->id = type_id;
-  ret = enif_make_resource(env, res);
-
-  // cleanup
-  enif_release_resource(res);
+  ret = enif_make_int(env, type_id);
   return enif_make_tuple2(env, ATOM_OK, ret);
 
  error:
@@ -262,7 +216,7 @@ ERL_NIF_TERM h5dget_type(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 // creates a new simple dataspace and opens it for access
 ERL_NIF_TERM h5dwrite(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-  Handle* dataset_res;
+  /* Handle* dataset_res; */
   hid_t dataset_id;
   herr_t err;
   ERL_NIF_TERM list;
@@ -274,7 +228,7 @@ ERL_NIF_TERM h5dwrite(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
   // parse arguments
   check(argc == 2, "Incorrent number of arguments");
-  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &dataset_res) != 0,	\
+  check(enif_get_int(env, argv[0], &dataset_id) != 0,	\
 	"Can't get dataset resource from argv");
 
   list = argv[1];
@@ -296,7 +250,7 @@ ERL_NIF_TERM h5dwrite(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     list = tail;
   }
 
-  dataset_id = dataset_res->id;
+  //dataset_id = dataset_res->id;
   check(dataset_id, "Failed to get dataset handler");
 
   // write the data to the dataset
@@ -326,15 +280,14 @@ static void freeArray(int **a, int length) {
 ERL_NIF_TERM h5dget_space(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   ERL_NIF_TERM ret;
-  Handle* dataset_res;
-  hid_t space_id;
+  hid_t space_id, dataset_id;
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &dataset_res) != 0,	\
+  check(enif_get_int(env, argv[0], &dataset_id) != 0,	\
 	"Can't get dataset resource from argv");
 
-  space_id = H5Dget_space(dataset_res->id);
+  space_id = H5Dget_space(dataset_id);
   check(space_id >= 0, "Failed to get space.");
 
   ret = enif_make_int(env, space_id);

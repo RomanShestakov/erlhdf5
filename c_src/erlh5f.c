@@ -41,41 +41,8 @@ static int convert_access_flag(char* file_flags, unsigned *flags)
     *flags = H5F_ACC_RDWR;
   else if(strncmp(file_flags, "H5F_ACC_RDONLY", MAXBUFLEN) == 0)
     *flags = H5F_ACC_RDONLY;
-  /* else if(strncmp(file_flags, "H5P_OBJECT_CREATE", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_OBJECT_CREATE; */
-  /* else if(strncmp(file_flags, "H5P_FILE_CREATE", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_FILE_CREATE; */
-  /* else if(strncmp(file_flags, "H5P_FILE_ACCESS", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_FILE_ACCESS; */
-  /* else if(strncmp(file_flags, "H5P_DATASET_CREATE", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_DATASET_CREATE; */
-  /* else if(strncmp(file_flags, "H5P_DATASET_ACCESS", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_DATASET_ACCESS; */
-  /* else if(strncmp(file_flags, "H5P_DATASET_XFER", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_DATASET_XFER; */
-  /* else if(strncmp(file_flags, "H5P_FILE_MOUNT", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_FILE_MOUNT; */
-  /* else if(strncmp(file_flags, "H5P_GROUP_CREATE", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_GROUP_CREATE; */
-  /* else if(strncmp(file_flags, "H5P_GROUP_ACCESS", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_GROUP_ACCESS; */
-  /* else if(strncmp(file_flags, "H5P_DATATYPE_CREATE", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_DATATYPE_CREATE; */
-  /* else if(strncmp(file_flags, "H5P_DATATYPE_ACCESS", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_DATATYPE_ACCESS; */
-  /* else if(strncmp(file_flags, "H5P_STRING_CREATE", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_STRING_CREATE; */
-  /* else if(strncmp(file_flags, "H5P_ATTRIBUTE_CREATE", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_ATTRIBUTE_CREATE; */
-  /* else if(strncmp(file_flags, "H5P_OBJECT_COPY", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_OBJECT_COPY; */
-  /* else if(strncmp(file_flags, "H5P_LINK_CREATE", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_LINK_CREATE; */
-  /* else if(strncmp(file_flags, "H5P_LINK_ACCESS", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_LINK_ACCESS; */
   else
     sentinel("Unknown file access flag %s", file_flags);
-
   return 0;
 
  error:
@@ -111,10 +78,7 @@ ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   res = enif_alloc_resource(RES_TYPE, sizeof(Handle));
   check(res, "Failed to allocate resource for type %s", "FileHandle");
 
-  // add ref to resource
-  res->id = file_id;
-  ret = enif_make_resource(env, res);
-  enif_release_resource(res);
+  ret = enif_make_int(env, file_id);
   return enif_make_tuple2(env, ATOM_OK, ret);
 
  error:
@@ -146,14 +110,7 @@ ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   file_id = H5Fopen(file_name, flags, H5P_DEFAULT);
   check(file_id > 0, "Failed to open %s.", file_name);
 
-  // create a resource to pass reference to file_id back to erlang
-  res = enif_alloc_resource(RES_TYPE, sizeof(Handle));
-  check(res, "Failed to allocate resource for type %s", "FileHandle");
-
-  // add ref to resource
-  res->id = file_id;
-  ret = enif_make_resource(env, res);
-  enif_release_resource(res);
+  ret = enif_make_int(env, file_id);
   return enif_make_tuple2(env, ATOM_OK, ret);
 
  error:
@@ -164,18 +121,17 @@ ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 // open file
 ERL_NIF_TERM h5fclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-  Handle* res;
   herr_t err;
+  hid_t file_id;
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &res) != 0,	\
+  check(enif_get_int(env, argv[0], &file_id) != 0,	\
 	"Can't get resource from argv");
 
   // close file
-  err = H5Fclose(res->id);
+  err = H5Fclose(file_id);
   check(err == 0, "Failed to close file.");
-
   return ATOM_OK;
 
  error:

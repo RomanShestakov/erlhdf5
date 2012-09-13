@@ -35,11 +35,8 @@ static int convert_type(char* dtype,  hid_t* dtype_id)
 {
   if(strncmp(dtype, "H5T_NATIVE_INT", MAXBUFLEN) == 0)
     *dtype_id = H5T_NATIVE_INT;
-  /* else if(strncmp(file_flags, "H5P_LINK_ACCESS", MAXBUFLEN) == 0) */
-  /*   *flags = H5P_LINK_ACCESS; */
   else
     sentinel("Unknown type %s", dtype);
-
   return 0;
 
  error:
@@ -52,9 +49,7 @@ ERL_NIF_TERM h5tcopy(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   hid_t dtype_id; // dataset creation property list
   hid_t type_id;
-  Handle* res;
   ERL_NIF_TERM ret;
-  //unsigned cls_id;
   char type[MAXBUFLEN];
 
   // parse arguments
@@ -68,16 +63,7 @@ ERL_NIF_TERM h5tcopy(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   type_id = H5Tcopy(dtype_id);
   check(type_id > 0, "Failed to create type.");
 
-  // create a resource to pass reference to id back to erlang
-  res = enif_alloc_resource(RES_TYPE, sizeof(Handle));
-  check(res, "Failed to allocate resource for type %s", "Handle");
-
-  // add ref to resource
-  res->id = type_id;
-  ret = enif_make_resource(env, res);
-
-  // cleanup
-  enif_release_resource(res);
+  ret = enif_make_int(env, type_id);
   return enif_make_tuple2(env, ATOM_OK, ret);
 
  error:
@@ -89,16 +75,16 @@ ERL_NIF_TERM h5tcopy(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 // close
 ERL_NIF_TERM h5tclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-  Handle* res;
   herr_t err;
+  hid_t type_id;
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &res) != 0,	\
+  check(enif_get_int(env, argv[0], &type_id) != 0,	\
 	"Can't get resource from argv");
 
   // close properties list
-  err = H5Tclose(res->id);
+  err = H5Tclose(type_id);
   check(err == 0, "Failed to close type.");
   return ATOM_OK;
 
@@ -106,19 +92,20 @@ ERL_NIF_TERM h5tclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   return error_tuple(env, "Can not close type");
 };
 
+
 // Returns the datatype class identifier.
 ERL_NIF_TERM h5tget_class(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-  Handle* res;
   ERL_NIF_TERM ret;
   H5T_class_t class_id;
+  hid_t type_id;
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &res) != 0,	\
+  check(enif_get_int(env, argv[0], &type_id) != 0,	\
 	"Can't get resource from argv");
 
-  class_id = H5Tget_class(res->id);
+  class_id = H5Tget_class(type_id);
   //fprintf(stderr, "class type: %d\r\n", class_id);
   check(class_id != H5T_NO_CLASS, "Failed to get type class.");
 
@@ -129,19 +116,20 @@ ERL_NIF_TERM h5tget_class(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   return error_tuple(env, "Can not get type class");
 };
 
+
 // Returns the byte order of an atomic datatype.
 ERL_NIF_TERM h5tget_order(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-  Handle* res;
   ERL_NIF_TERM ret;
   H5T_order_t order;
+  hid_t type_id;
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &res) != 0,	\
+  check(enif_get_int(env, argv[0], &type_id) != 0,	\
 	"Can't get resource from argv");
 
-  order = H5Tget_order(res->id);
+  order = H5Tget_order(type_id);
   check(order != H5T_ORDER_ERROR, "Failed to get order.");
 
   ret = enif_make_int(env, order);
@@ -151,19 +139,20 @@ ERL_NIF_TERM h5tget_order(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   return error_tuple(env, "Can not get order");
 };
 
+
 // Returns the byte order of an atomic datatype.
 ERL_NIF_TERM h5tget_size(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-  Handle* res;
   ERL_NIF_TERM ret;
   size_t size;
+  hid_t type_id;
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_resource(env, argv[0], RES_TYPE, (void**) &res) != 0,	\
+  check(enif_get_int(env, argv[0], &type_id) != 0,	\
 	"Can't get resource from argv");
 
-  size = H5Tget_size(res->id);
+  size = H5Tget_size(type_id);
   check(size > 0, "Failed to get size.");
 
   ret = enif_make_int(env, size);

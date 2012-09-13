@@ -69,15 +69,14 @@ ERL_NIF_TERM h5screate_simple(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
   // cleanup
   enif_release_resource(res);
   free(dimsf);
-
   return enif_make_tuple2(env, ATOM_OK, ret);
 
  error:
   if(dataspace_id) H5Sclose(dataspace_id);
   if(dimsf) free(dimsf);
-
   return error_tuple(env, "Can not create dataspace");
 };
+
 
 // close
 ERL_NIF_TERM h5sclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
@@ -93,7 +92,6 @@ ERL_NIF_TERM h5sclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   // close properties list
   err = H5Sclose(res->id);
   check(err == 0, "Failed to close dataspace.");
-
   return ATOM_OK;
 
  error:

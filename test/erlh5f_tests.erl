@@ -37,6 +37,8 @@ close(H) ->
 
 run(_P) ->
     [
+     %{ok, _H} = erlhdf5:h5fopen("test_file_hdf5.h5", 'H5F_ACC_TRUNC'),
+
      %?_assertMatch({ok, _}, erlhdf5:h5screate_simple(2, {2, 2}))
      ?_assertMatch({ok, _}, {ok, ok})
     ].
