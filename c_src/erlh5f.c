@@ -54,7 +54,6 @@ static int convert_access_flag(char* file_flags, unsigned *flags)
 ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   hid_t file_id;
-  Handle* res;
   ERL_NIF_TERM ret;
   char file_name[MAXBUFLEN];
   char file_access_flags[MAXBUFLEN];
@@ -74,10 +73,6 @@ ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   file_id = H5Fcreate(file_name, flags, H5P_DEFAULT, H5P_DEFAULT);
   check(file_id > 0, "Failed to create %s.", file_name);
 
-  // create a resource to pass reference to file_id back to erlang
-  res = enif_alloc_resource(RES_TYPE, sizeof(Handle));
-  check(res, "Failed to allocate resource for type %s", "FileHandle");
-
   ret = enif_make_int(env, file_id);
   return enif_make_tuple2(env, ATOM_OK, ret);
 
@@ -90,7 +85,6 @@ ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   hid_t file_id;
-  Handle* res;
   ERL_NIF_TERM ret;
   char file_name[MAXBUFLEN];
   char file_access_flags[MAXBUFLEN];

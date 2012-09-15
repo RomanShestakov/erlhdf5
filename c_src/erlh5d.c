@@ -53,7 +53,6 @@ static herr_t convert_space_status(H5D_space_status_t space_status,  char* space
 ERL_NIF_TERM h5dcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   ERL_NIF_TERM ret;
-  Handle* dataspace_res;
   Handle* dcpl_res;
   char ds_name[MAXBUFLEN];
   hid_t file_id;
@@ -70,12 +69,11 @@ ERL_NIF_TERM h5dcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 	"Can't get dataset name from argv");
   check(enif_get_int(env, argv[2], &type_id) != 0,	\
 	"Can't get datatype resource from argv");
-  check(enif_get_resource(env, argv[3], RES_TYPE, (void**) &dataspace_res) != 0,	\
+  check(enif_get_int(env, argv[3], &dataspace_id) != 0,	\
 	"Can't get dataspace resource from argv");
   check(enif_get_resource(env, argv[4], RES_TYPE, (void**) &dcpl_res) != 0,	\
 	"Can't get properties resource from argv");
 
-  dataspace_id = dataspace_res->id;
   dcpl_id = dcpl_res->id;
 
   // create a new file using default properties

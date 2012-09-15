@@ -88,10 +88,18 @@ h5_read(Config) ->
     {ok, Size} = erlhdf5:h5tget_size(Type),
     ct:log("Size: ~p", [Size]),
 
-    {ok, _Dataspace} = erlhdf5:h5dget_space(DS),
+    {ok, Dataspace} = erlhdf5:h5dget_space(DS),
+
+    {ok, NDims} = erlhdf5:h5sget_simple_extent_ndims(Dataspace),
+    ct:log("NDims: ~p", [NDims]),
+
+    {ok, Dims, MaxDims} = erlhdf5:h5sget_simple_extent_dims(Dataspace, NDims),
+    ct:log("Dims: ~p, MaxDims: ~p", [Dims, MaxDims]),
 
     %% close resources
     ok = erlhdf5:h5tclose(Type),
+    ok = erlhdf5:h5sclose(Dataspace),
+
     ok.
 
 

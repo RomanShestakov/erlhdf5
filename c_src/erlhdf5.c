@@ -63,6 +63,8 @@ static ErlNifFunc nif_funcs[] =
   {"h5fclose", 1, h5fclose},
   {"h5screate_simple", 2, h5screate_simple},
   {"h5sclose", 1, h5sclose},
+  {"h5sget_simple_extent_dims", 2, h5sget_simple_extent_dims},
+  {"h5sget_simple_extent_ndims", 1, h5sget_simple_extent_ndims},
   {"h5pcreate", 1, h5pcreate},
   {"h5pclose", 1, h5pclose},
   {"h5tcopy", 1, h5tcopy},
