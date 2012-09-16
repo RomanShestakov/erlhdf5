@@ -75,19 +75,23 @@ h5_write(Config) ->
 %% @end
 %%--------------------------------------------------------------------
 h5_lite_write(_Config) ->
+    %% set some params
+    FileName = "hdf5_lt.h5",
+    Rank = 2,
+    DS_Name = "/dset_lt",
+
     %% open new file
-    {ok, File} = erlhdf5:h5fcreate("hdf5_lt.h5", 'H5F_ACC_TRUNC'),
+    {ok, File} = erlhdf5:h5fcreate(FileName, 'H5F_ACC_TRUNC'),
 
     %% create dataset with rank = 2
-    Rank = 2,
-    ok = erlhdf5:h5lt_make_dataset(File, "/dset_lt", Rank, {2, 3}, [1,2,3,4,5,6]),
+    ok = erlhdf5:h5lt_make_dataset(File, DS_Name, Rank, {2, 3}, [1,2,3,4,5,6]),
 
     %% get dataset rank - should match to rank used in dataset creation
-    {ok, Rank} = erlhdf5:h5ltget_dataset_ndims(File, "/dset_lt"),
+    {ok, Rank} = erlhdf5:h5ltget_dataset_ndims(File, DS_Name),
     ct:log("dataset rank : ~p ", [Rank]),
 
     %% check ds info
-    {ok, DS_Info} = erlhdf5:h5ltget_dataset_info(File, "/dset_lt", Rank),
+    {ok, DS_Info} = erlhdf5:h5ltget_dataset_info(File, DS_Name, Rank),
     ct:log("dataset info : ~p ", [DS_Info]),
 
     %% {ok, Status1} = erlhdf5:h5d_get_space_status(DS),

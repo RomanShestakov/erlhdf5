@@ -55,11 +55,13 @@ ERL_NIF_TERM h5lt_make_dataset(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv
 
   // allocate array of size rank
   dims_arr = (hsize_t*) malloc(arity * sizeof(hsize_t));
-  int n;
-  for(i = 0; i < arity; i++) {
-    check(enif_get_int(env, dims[i], &n), "error getting diskspace dimensions");
-    dims_arr[i] = (hsize_t)n;
-  }
+  /* int n; */
+  /* for(i = 0; i < arity; i++) { */
+  /*   check(enif_get_int(env, dims[i], &n), "error getting diskspace dimensions"); */
+  /*   dims_arr[i] = (hsize_t)n; */
+  /* } */
+  err = convert_nif_to_hsize_array(env, arity, dims, dims_arr);
+  check(err == 0, "can't convert dims arr");
 
   // allocate space for array to hold elements of list
   data = malloc(list_length * sizeof(int));

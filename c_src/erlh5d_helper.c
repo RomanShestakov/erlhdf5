@@ -34,3 +34,16 @@ int convert_array_to_nif_array(ErlNifEnv* env, hsize_t size, hsize_t *arr_from, 
   }
   return 0;
 };
+
+int convert_nif_to_hsize_array(ErlNifEnv* env, hsize_t size, const ERL_NIF_TERM* arr_from, hsize_t *arr_to)
+{
+  int n, i;
+  for(i = 0; i < size; i++) {
+    check(enif_get_int(env, arr_from[i], &n), "error getting diskspace dimensions");
+    arr_to[i] = (hsize_t)n;
+  }
+  return 0;
+
+ error:
+  return -1;
+};

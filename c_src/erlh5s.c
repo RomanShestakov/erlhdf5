@@ -26,7 +26,6 @@
 #include "erlhdf5.h"
 
 // H5S: Dataspace Interface
-/* static int convert_array_to_nif_array(ErlNifEnv* env, hsize_t size, hsize_t *arr_from, ERL_NIF_TERM* arr_to); */
 
 // creates a new simple dataspace and opens it for access
 ERL_NIF_TERM h5screate_simple(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
@@ -36,8 +35,8 @@ ERL_NIF_TERM h5screate_simple(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
   const ERL_NIF_TERM *terms;
   int rank; // number of dimensions of dataspace
   hsize_t* dimsf; // array specifiying the size of each dimension
-  int i;
   int arity;
+  herr_t err;
 
   // parse arguments
   check(argc == 2, "Incorrent number of arguments");
@@ -48,11 +47,8 @@ ERL_NIF_TERM h5screate_simple(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
 
   // allocate array of size rank
   dimsf = (hsize_t*) malloc(arity * sizeof(hsize_t));
-  int n;
-  for(i = 0; i < arity; i++) {
-    check(enif_get_int(env, terms[i], &n), "error getting diskspace dimensions");
-    dimsf[i] = (hsize_t)n;
-  }
+  err = convert_nif_to_hsize_array(env, arity, terms, dimsf);
+  check(err == 0, "can't convert dims arr");
 
   // create a new file using default properties
   dataspace_id = H5Screate_simple(rank, dimsf, NULL);
@@ -159,13 +155,3 @@ ERL_NIF_TERM h5sget_simple_extent_dims(ErlNifEnv* env, int argc, const ERL_NIF_T
   if(maxdims) free(maxdims);
   return error_tuple(env, "Can not get dims");
 };
-
-
-/* static int convert_array_to_nif_array(ErlNifEnv* env, hsize_t size, hsize_t *arr_from, ERL_NIF_TERM* arr_to) */
-/* { */
-/*   int i; */
-/*   for(i = 0; i < size; i++) { */
-/*     arr_to[i] = enif_make_int(env, arr_from[i]); */
-/*   } */
-/*   return 0; */
-/* }; */
