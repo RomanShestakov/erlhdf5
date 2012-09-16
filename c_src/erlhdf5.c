@@ -56,6 +56,22 @@ ERL_NIF_TERM error_tuple(ErlNifEnv* env, char* reason)
     return enif_make_tuple2(env, ATOM_ERROR, why);
 }
 
+/* // convert array on ints to array of ErlNifEnv */
+/* int convert_int_arr_to_nif_array(ErlNifEnv* env, int arity, int* arr_from, ErlNifEnv* arr_to) */
+/* { */
+/*   /\* arr_to = (ErlNifEnv*) malloc(arity * sizeof(ErlNifEnv)); *\/ */
+/*   int i; */
+/*   for(i = 0; i < arity; i++) { */
+/*     check(enif_get_int(env, arr_from[i], arr_to[i]), "error converting int to ErlNifEnv"); */
+/*   } */
+/*   return 0; */
+
+/*  error: */
+/*   return -1; */
+/* }; */
+
+
+
 static ErlNifFunc nif_funcs[] =
 {
   {"h5fcreate", 2, h5fcreate},
@@ -79,9 +95,10 @@ static ErlNifFunc nif_funcs[] =
   {"h5d_get_space_status", 1, h5d_get_space_status},
   {"h5dwrite", 2, h5dwrite},
   {"h5d_get_storage_size", 1, h5d_get_storage_size},
-  {"h5dget_space", 1, h5dget_space}
+  {"h5dget_space", 1, h5dget_space},
+  {"h5lt_make_dataset", 5, h5lt_make_dataset},
+  {"h5lt_read_dataset_int", 2, h5lt_read_dataset_int}
   //  {"h5dwrite_example", 2, h5dwrite_example}
 };
-
 
 ERL_NIF_INIT(erlhdf5, nif_funcs, &load, NULL, NULL, NULL);

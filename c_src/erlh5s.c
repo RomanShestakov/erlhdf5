@@ -151,6 +151,7 @@ ERL_NIF_TERM h5sget_simple_extent_dims(ErlNifEnv* env, int argc, const ERL_NIF_T
    // cleanup
   free(dims);
   free(maxdims);
+
   return enif_make_tuple3(env, ATOM_OK, dims_list, maxdims_list);
 
  error:

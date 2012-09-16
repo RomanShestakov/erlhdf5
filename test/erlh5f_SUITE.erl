@@ -44,7 +44,8 @@ end_per_testcase(_TestCase, Config) ->
 all() ->
     [
      h5_write,
-     h5_read
+     h5_read,
+     h5_lite_write
      %write_example
     ].
 
@@ -60,11 +61,35 @@ h5_write(Config) ->
     ct:log("dataset status: ~p, size: ~p ", [Status, Size]),
 
     %write some data into dataset
-    ok = erlhdf5:h5dwrite(DS, [{1, 3, 4},{2, 5, 5},{3, 6, 6},{4, 7, 6},{5, 7, 7},{6, 8, 7},{7, 9, 10},{8, 9, 11},{9, 7, 12}]),
+    ok = erlhdf5:h5dwrite(DS, [{1, 3, 4},{2, 5, 5},{3, 6, 6},{4, 7, 6},
+			       {5, 7, 7},{6, 8, 7},{7, 9, 10},{8, 9, 11},{9, 7, 12}]),
 
     {ok, Status1} = erlhdf5:h5d_get_space_status(DS),
     {ok, Size1} = erlhdf5:h5d_get_storage_size(DS),
     ct:log("dataset status after write: ~p, size: ~p ", [Status1, Size1]),
+    ok.
+
+%%--------------------------------------------------------------------
+%% @doc
+%% h5_write.c
+%% @end
+%%--------------------------------------------------------------------
+h5_lite_write(_Config) ->
+    %%File = ?config(file, Config),
+    %% {ok, Status} = erlhdf5:h5d_get_space_status(DS),
+    %% {ok, Size} = erlhdf5:h5d_get_storage_size(DS),
+    %% ct:log("dataset status: ~p, size: ~p ", [Status, Size]),
+    {ok, File} = erlhdf5:h5fcreate("hdf5_lt.h5", 'H5F_ACC_TRUNC'),
+
+    %% %write some data into dataset
+    %% ok = erlhdf5:h5dwrite(DS, [{1, 3, 4},{2, 5, 5},{3, 6, 6},{4, 7, 6},
+    %% 			       {5, 7, 7},{6, 8, 7},{7, 9, 10},{8, 9, 11},{9, 7, 12}]),
+    {ok, C} = erlhdf5:h5lt_make_dataset(File, "/dset_lt", 2, {2, 3}, [1,2,3,4,5,6]),
+
+    %% {ok, Status1} = erlhdf5:h5d_get_space_status(DS),
+    %% {ok, Size1} = erlhdf5:h5d_get_storage_size(DS),
+    ct:log("dataset status : ~p ", [C]),
+    ok = erlhdf5:h5fclose(File),
     ok.
 
 
