@@ -46,6 +46,7 @@ typedef struct
 // prototypes
 ERL_NIF_TERM error_tuple(ErlNifEnv* env, char* reason);
 int convert_int_arr_to_nif_array(ErlNifEnv* env, int arity, int* arr_from, ErlNifEnv* arr_to);
+int convert_array_to_nif_array(ErlNifEnv* env, hsize_t size, hsize_t *arr_from, ERL_NIF_TERM* arr_to);
 
 
 ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
@@ -73,6 +74,7 @@ ERL_NIF_TERM h5dget_space(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 ERL_NIF_TERM h5lt_make_dataset(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 ERL_NIF_TERM h5lt_read_dataset_int(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 ERL_NIF_TERM h5ltget_dataset_ndims(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM h5ltget_dataset_info(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 
 //ERL_NIF_TERM h5dwrite_example(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 

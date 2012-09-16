@@ -26,7 +26,7 @@
 #include "erlhdf5.h"
 
 // H5S: Dataspace Interface
-static int convert_array_to_nif_array(ErlNifEnv* env, hsize_t size, hsize_t *arr_from, ERL_NIF_TERM* arr_to);
+/* static int convert_array_to_nif_array(ErlNifEnv* env, hsize_t size, hsize_t *arr_from, ERL_NIF_TERM* arr_to); */
 
 // creates a new simple dataspace and opens it for access
 ERL_NIF_TERM h5screate_simple(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
@@ -161,11 +161,11 @@ ERL_NIF_TERM h5sget_simple_extent_dims(ErlNifEnv* env, int argc, const ERL_NIF_T
 };
 
 
-static int convert_array_to_nif_array(ErlNifEnv* env, hsize_t size, hsize_t *arr_from, ERL_NIF_TERM* arr_to)
-{
-  int i;
-  for(i = 0; i < size; i++) {
-    arr_to[i] = enif_make_int(env, arr_from[i]);
-  }
-  return 0;
-};
+/* static int convert_array_to_nif_array(ErlNifEnv* env, hsize_t size, hsize_t *arr_from, ERL_NIF_TERM* arr_to) */
+/* { */
+/*   int i; */
+/*   for(i = 0; i < size; i++) { */
+/*     arr_to[i] = enif_make_int(env, arr_from[i]); */
+/*   } */
+/*   return 0; */
+/* }; */

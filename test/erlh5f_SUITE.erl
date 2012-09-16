@@ -86,6 +86,10 @@ h5_lite_write(_Config) ->
     {ok, Rank} = erlhdf5:h5ltget_dataset_ndims(File, "/dset_lt"),
     ct:log("dataset rank : ~p ", [Rank]),
 
+    %% check ds info
+    {ok, DS_Info} = erlhdf5:h5ltget_dataset_info(File, "/dset_lt", Rank),
+    ct:log("dataset info : ~p ", [DS_Info]),
+
     %% {ok, Status1} = erlhdf5:h5d_get_space_status(DS),
     %% {ok, Size1} = erlhdf5:h5d_get_storage_size(DS),
     %% ct:log("dataset status : ~p ", [C]),
