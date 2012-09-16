@@ -72,6 +72,7 @@ ERL_NIF_TERM h5dget_type(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 ERL_NIF_TERM h5dget_space(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 ERL_NIF_TERM h5lt_make_dataset(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 ERL_NIF_TERM h5lt_read_dataset_int(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM h5ltget_dataset_ndims(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 
 //ERL_NIF_TERM h5dwrite_example(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 

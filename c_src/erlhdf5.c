@@ -97,7 +97,9 @@ static ErlNifFunc nif_funcs[] =
   {"h5d_get_storage_size", 1, h5d_get_storage_size},
   {"h5dget_space", 1, h5dget_space},
   {"h5lt_make_dataset", 5, h5lt_make_dataset},
-  {"h5lt_read_dataset_int", 2, h5lt_read_dataset_int}
+  {"h5lt_read_dataset_int", 2, h5lt_read_dataset_int},
+  {"h5ltget_dataset_ndims", 2, h5ltget_dataset_ndims}
+
   //  {"h5dwrite_example", 2, h5dwrite_example}
 };
 

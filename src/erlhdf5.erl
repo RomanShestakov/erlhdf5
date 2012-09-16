@@ -25,7 +25,7 @@
 -export([h5tcopy/1, h5tclose/1, h5tget_class/1, h5tget_order/1, h5tget_size/1]).
 -export([h5dcreate/5, h5dopen/2, h5dclose/1, h5dget_type/1, h5d_get_space_status/1,
 	 h5dwrite/2, h5d_get_storage_size/1, h5dget_space/1]).
--export([h5lt_make_dataset/5, h5lt_read_dataset_int/2]).
+-export([h5lt_make_dataset/5, h5lt_read_dataset_int/2, h5ltget_dataset_ndims/2]).
 
 %, h5dwrite_example/2
 
@@ -243,13 +243,13 @@ h5d_get_storage_size(_Handler) ->
 h5dget_space(_Handler) ->
     nif_error(?LINE).
 
-%%--------------------------------------------------------------------
+%% --------------------------------------------------------------------
 %% @doc
 %% Wrtie a dataset from disk.
 %% @end
-%%--------------------------------------------------------------------
-%% -spec h5lt_make_dataset(FileHandler::integer(), DatasetName::string(), Rank::integer(),
-%% 			Dims::list(), Data::list()) -> ok | {error, Reason::atom()}.
+%% --------------------------------------------------------------------
+-spec h5lt_make_dataset(FileHandler::integer(), DatasetName::string(), Rank::integer(),
+			Dims::list(), Data::list()) -> ok | {error, Reason::atom()}.
 h5lt_make_dataset(_FileHandler, _DatasetName, _Rank, _Dims, _Data) ->
     nif_error(?LINE).
 
@@ -258,8 +258,17 @@ h5lt_make_dataset(_FileHandler, _DatasetName, _Rank, _Dims, _Data) ->
 %% Reads a dataset from disk.
 %% @end
 %%--------------------------------------------------------------------
--spec h5lt_read_dataset_int(Handler::integer(), _DatasetName::string()) -> ok | {error, Reason::atom()}.
+-spec h5lt_read_dataset_int(Handler::integer(), DatasetName::string()) -> ok | {error, Reason::atom()}.
 h5lt_read_dataset_int(_Handler, _DatasetName) ->
+    nif_error(?LINE).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% Gets the dimensionality of a dataset.
+%% @end
+%%--------------------------------------------------------------------
+-spec h5ltget_dataset_ndims(Handler::integer(), DatasetName::string()) -> {ok, integer()} | {error, Reason::atom()}.
+h5ltget_dataset_ndims(_Handler, _DatasetName) ->
     nif_error(?LINE).
 
 %% %%-spec h5dwrite_example(Handler::binary()) -> {ok, Size::integer()} | {error, Reason::atom()}.
