@@ -27,7 +27,7 @@
 #include "erlhdf5.h"
 
 
-static int unpack_int_list(ErlNifEnv* env, unsigned int list_length, const ERL_NIF_TERM list, int* data);
+static int unpack_int_list(ErlNifEnv* env, ERL_NIF_TERM* list, int* data);
 
 // creates a new simple dataspace and opens it for access
 ERL_NIF_TERM h5lt_make_dataset(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
@@ -41,7 +41,6 @@ ERL_NIF_TERM h5lt_make_dataset(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv
   hsize_t* dims_arr; // array specifiying the size of each dimension
   ERL_NIF_TERM list;
   unsigned int list_length;
-  int i = 0;
 
   // parse arguments
   check(argc == 5, "Incorrent number of arguments");
@@ -55,11 +54,6 @@ ERL_NIF_TERM h5lt_make_dataset(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv
 
   // allocate array of size rank
   dims_arr = (hsize_t*) malloc(arity * sizeof(hsize_t));
-  /* int n; */
-  /* for(i = 0; i < arity; i++) { */
-  /*   check(enif_get_int(env, dims[i], &n), "error getting diskspace dimensions"); */
-  /*   dims_arr[i] = (hsize_t)n; */
-  /* } */
   err = convert_nif_to_hsize_array(env, arity, dims, dims_arr);
   check(err == 0, "can't convert dims arr");
 
@@ -68,7 +62,7 @@ ERL_NIF_TERM h5lt_make_dataset(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv
   check(data, "can't allocate mem");
 
   // convert a list of ints into array
-  err = unpack_int_list(env, list_length, list, data);
+  err = unpack_int_list(env, &list, data);
   check(err == 0, "can't unpack list");
 
   // make a dataset
@@ -78,7 +72,6 @@ ERL_NIF_TERM h5lt_make_dataset(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv
   // cleanup
   free(dims_arr);
   free(data);
-
   return ATOM_OK;
 
  error:
@@ -87,17 +80,16 @@ ERL_NIF_TERM h5lt_make_dataset(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv
   return error_tuple(env, "Can not make dataset");
 };
 
+
 // unpack a list of ints into an array of ints
-static int unpack_int_list(ErlNifEnv* env, unsigned int list_length, ERL_NIF_TERM list, int* data)
+static int unpack_int_list(ErlNifEnv* env, ERL_NIF_TERM* list, int* data)
 {
   int i = 0;
   ERL_NIF_TERM head, tail;
 
-  while(enif_get_list_cell(env, list, &head, &tail)) {
-    for(i = 0; i < list_length; i++) {
-      check(enif_get_int(env, head, &data[i]), "error upacking an element");
-    }
-    list = tail;
+  while(enif_get_list_cell(env, *list, &head, &tail)) {
+    check(enif_get_int(env, head, &data[i++]), "error upacking an element");
+    *list = tail;
   }
   return 0;
 
@@ -105,14 +97,22 @@ static int unpack_int_list(ErlNifEnv* env, unsigned int list_length, ERL_NIF_TER
   return -1;
 };
 
+
 // creates a new simple dataspace and opens it for access
 ERL_NIF_TERM h5lt_read_dataset_int(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   hid_t file_id;
   char ds_name[MAXBUFLEN];
   herr_t err;
-  int *out_buffer;
-  /* ERL_NIF_TERM ret; */
+  int *data;
+  //int data[6];
+  ERL_NIF_TERM* data_arr;
+  size_t n_values = 1;
+  hsize_t *dims;
+  //int rank;
+  int ndims;
+  int i;
+  ERL_NIF_TERM ret;
 
   // parse arguments
   check(argc == 2, "Incorrent number of arguments");
@@ -120,17 +120,40 @@ ERL_NIF_TERM h5lt_read_dataset_int(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
   check(enif_get_string(env, argv[1], ds_name, sizeof(ds_name), ERL_NIF_LATIN1) != 0, \
 	"Can't get dataset name from argv");
 
-  // read a dataset
-  err = H5LTread_dataset_int(file_id, ds_name, out_buffer);
-  check(err > 0, "Failed to read dataset.");
+  // get dimensions
+  err = H5LTget_dataset_ndims(file_id, ds_name, &ndims);
+  check(err == 0, "Failed to determine dataspace dimensions.");
 
-  /* // cleanup */
-  /* free(dimsf); */
-  /* ret = enif_make_int(env, dataspace_id); */
-  //  return enif_make_tuple2(env, ATOM_OK, ret);
-  return ATOM_OK;
+  //get dataset info
+  dims = malloc(ndims * sizeof(hsize_t));
+  err = H5LTget_dataset_info(file_id, ds_name, dims, NULL, NULL);
+  check(err == 0, "Failed to get info about dataset.");
+
+  // find out a number of values in the dataset
+  for(i = 0; i < ndims; i++){
+    n_values = n_values * dims[i];
+  }
+
+  data = malloc(n_values * sizeof(int));
+
+  // read a dataset
+  err = H5LTread_dataset_int(file_id, ds_name, data);
+  check(err == 0, "Failed to read dataset.");
+
+  for(i = 0; i < n_values; i++){
+    data_arr[i] = enif_make_int(env, data[i]);
+  }
+
+  ret = enif_make_list_from_array(env, data_arr, 6);
+
+  // cleanup
+  free(dims);
+  free(data);
+  return enif_make_tuple2(env, ATOM_OK, ret);
 
  error:
+  if(dims) free(dims);
+  if(data) free(data);
   return error_tuple(env, "Can not read dataset");
 };
 
