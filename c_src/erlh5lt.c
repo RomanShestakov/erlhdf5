@@ -105,11 +105,9 @@ ERL_NIF_TERM h5lt_read_dataset_int(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
   char ds_name[MAXBUFLEN];
   herr_t err;
   int *data;
-  //int data[6];
   ERL_NIF_TERM* data_arr;
   size_t n_values = 1;
   hsize_t *dims;
-  //int rank;
   int ndims;
   int i;
   ERL_NIF_TERM ret;
@@ -134,26 +132,33 @@ ERL_NIF_TERM h5lt_read_dataset_int(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
     n_values = n_values * dims[i];
   }
 
+  // allocate space to hold dataset values
   data = malloc(n_values * sizeof(int));
+  data_arr = malloc(n_values * sizeof(ERL_NIF_TERM));
 
   // read a dataset
   err = H5LTread_dataset_int(file_id, ds_name, data);
   check(err == 0, "Failed to read dataset.");
 
+  // convert into array of ERL_NIF_TERM
   for(i = 0; i < n_values; i++){
     data_arr[i] = enif_make_int(env, data[i]);
   }
 
+  // make a list of ERL_NIF_TERM to return to the caller
   ret = enif_make_list_from_array(env, data_arr, 6);
 
   // cleanup
   free(dims);
   free(data);
+  free(data_arr);
+
   return enif_make_tuple2(env, ATOM_OK, ret);
 
  error:
   if(dims) free(dims);
   if(data) free(data);
+  if(data_arr) free(data_arr);
   return error_tuple(env, "Can not read dataset");
 };
 
