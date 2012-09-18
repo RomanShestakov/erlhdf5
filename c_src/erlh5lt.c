@@ -34,7 +34,6 @@ ERL_NIF_TERM h5lt_make_dataset(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv
 {
   hid_t file_id;
   char ds_name[MAXBUFLEN];
-  herr_t err;
   const ERL_NIF_TERM *dims;
   int* data;
   int rank, arity;
@@ -44,30 +43,26 @@ ERL_NIF_TERM h5lt_make_dataset(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv
 
   // parse arguments
   check(argc == 5, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &file_id ) != 0, "Can't get file id from argv");
-  check(enif_get_string(env, argv[1], ds_name, sizeof(ds_name), ERL_NIF_LATIN1) != 0, \
-	"Can't get dataset name from argv");
-  check(enif_get_int(env, argv[2], &rank ) != 0, "Can't get rank from argv");
-  check(enif_get_tuple(env, argv[3], &arity, &dims) != 0, "Can't get dimensions from argv");
+  check(enif_get_int(env, argv[0], &file_id ), "Can't get file id from argv");
+  check(enif_get_string(env, argv[1], ds_name, sizeof(ds_name), ERL_NIF_LATIN1), "Can't get dataset name from argv");
+  check(enif_get_int(env, argv[2], &rank ), "Can't get rank from argv");
+  check(enif_get_tuple(env, argv[3], &arity, &dims), "Can't get dimensions from argv");
   check(enif_get_list_length(env, argv[4], &list_length), "empty data");
   list = argv[4];
 
   // allocate array of size rank
   dims_arr = (hsize_t*) malloc(arity * sizeof(hsize_t));
-  err = convert_nif_to_hsize_array(env, arity, dims, dims_arr);
-  check(err == 0, "can't convert dims arr");
+  check(!convert_nif_to_hsize_array(env, arity, dims, dims_arr), "can't convert dims arr");
 
   // allocate space for array to hold elements of list
   data = malloc(list_length * sizeof(int));
   check(data, "can't allocate mem");
 
   // convert a list of ints into array
-  err = unpack_int_list(env, &list, data);
-  check(err == 0, "can't unpack list");
+  check(!unpack_int_list(env, &list, data), "can't unpack list");
 
   // make a dataset
-  err = H5LTmake_dataset(file_id, ds_name, arity, dims_arr, H5T_NATIVE_INT, data);
-  check(err == 0, "Failed to make dataset.");
+  check(!H5LTmake_dataset(file_id, ds_name, arity, dims_arr, H5T_NATIVE_INT, data), "Failed to make dataset.");
 
   // cleanup
   free(dims_arr);
@@ -113,9 +108,8 @@ ERL_NIF_TERM h5lt_read_dataset_int(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
 
   // parse arguments
   check(argc == 2, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &file_id ) != 0, "Can't get file id from argv");
-  check(enif_get_string(env, argv[1], ds_name, sizeof(ds_name), ERL_NIF_LATIN1) != 0, \
-	"Can't get dataset name from argv");
+  check(enif_get_int(env, argv[0], &file_id ), "Can't get file id from argv");
+  check(enif_get_string(env, argv[1], ds_name, sizeof(ds_name), ERL_NIF_LATIN1), "Can't get dataset name from argv");
 
   // get dimensions
   check(!H5LTget_dataset_ndims(file_id, ds_name, &ndims), "Failed to determine dataspace dimensions.");
@@ -161,16 +155,13 @@ ERL_NIF_TERM h5ltget_dataset_ndims(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
   hid_t file_id;
   int ndims;
   char ds_name[MAXBUFLEN];
-  herr_t err;
 
   // parse arguments
   check(argc == 2, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &file_id) != 0,	"Can't get resource from argv");
-  check(enif_get_string(env, argv[1], ds_name, sizeof(ds_name), ERL_NIF_LATIN1) != 0, \
-	"Can't get dataset name from argv");
+  check(enif_get_int(env, argv[0], &file_id), "Can't get resource from argv");
+  check(enif_get_string(env, argv[1], ds_name, sizeof(ds_name), ERL_NIF_LATIN1), "Can't get dataset name from argv");
 
-  err = H5LTget_dataset_ndims(file_id, ds_name, &ndims);
-  check(err == 0, "Failed to determine dataspace dimensions.");
+  check(!H5LTget_dataset_ndims(file_id, ds_name, &ndims), "Failed to determine dataspace dimensions.");
   return enif_make_tuple2(env, ATOM_OK, enif_make_int(env, ndims));
 
  error:
