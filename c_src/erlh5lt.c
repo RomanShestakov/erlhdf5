@@ -146,7 +146,7 @@ ERL_NIF_TERM h5lt_read_dataset_int(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
   }
 
   // make a list of ERL_NIF_TERM to return to the caller
-  ret = enif_make_list_from_array(env, data_arr, 6);
+  ret = enif_make_list_from_array(env, data_arr, n_values);
 
   // cleanup
   free(dims);
