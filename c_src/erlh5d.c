@@ -63,22 +63,18 @@ ERL_NIF_TERM h5dcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
   // parse arguments
   check(argc == 5, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &file_id) != 0,	\
-	"Can't get file resource from argv");
-  check(enif_get_string(env, argv[1], ds_name, sizeof(ds_name), ERL_NIF_LATIN1) != 0, \
+  check(enif_get_int(env, argv[0], &file_id), "Can't get file resource from argv");
+  check(enif_get_string(env, argv[1], ds_name, sizeof(ds_name), ERL_NIF_LATIN1), \
 	"Can't get dataset name from argv");
-  check(enif_get_int(env, argv[2], &type_id) != 0,	\
-	"Can't get datatype resource from argv");
-  check(enif_get_int(env, argv[3], &dataspace_id) != 0,	\
-	"Can't get dataspace resource from argv");
-  check(enif_get_resource(env, argv[4], RES_TYPE, (void**) &dcpl_res) != 0,	\
+  check(enif_get_int(env, argv[2], &type_id), "Can't get datatype resource from argv");
+  check(enif_get_int(env, argv[3], &dataspace_id), "Can't get dataspace resource from argv");
+  check(enif_get_resource(env, argv[4], RES_TYPE, (void**) &dcpl_res),	\
 	"Can't get properties resource from argv");
 
   dcpl_id = dcpl_res->id;
 
   // create a new file using default properties
-  ds_id = H5Dcreate(file_id, ds_name, type_id, dataspace_id,
-		    H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+  ds_id = H5Dcreate(file_id, ds_name, type_id, dataspace_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
   check(ds_id > 0, "Failed to create dataset.");
 
   ret = enif_make_int(env, ds_id);
@@ -99,9 +95,8 @@ ERL_NIF_TERM h5dopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
   // parse arguments
   check(argc == 2, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &file_id) != 0,	\
-	"Can't get file resource from argv");
-  check(enif_get_string(env, argv[1], ds_name, sizeof(ds_name), ERL_NIF_LATIN1) != 0, \
+  check(enif_get_int(env, argv[0], &file_id), "Can't get file resource from argv");
+  check(enif_get_string(env, argv[1], ds_name, sizeof(ds_name), ERL_NIF_LATIN1), \
 	"Can't get dataset name from argv");
 
   // create a new file using default properties
@@ -120,17 +115,14 @@ ERL_NIF_TERM h5dopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 // close
 ERL_NIF_TERM h5dclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-  herr_t err;
   hid_t ds_id;
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &ds_id) != 0,	\
-	"Can't get resource from argv");
+  check(enif_get_int(env, argv[0], &ds_id), "Can't get resource from argv");
 
   // close properties list
-  err = H5Dclose(ds_id);
-  check(err == 0, "Failed to close dataset.");
+  check(!H5Dclose(ds_id), "Failed to close dataset.");
   return ATOM_OK;
 
  error:
@@ -145,20 +137,16 @@ ERL_NIF_TERM h5d_get_space_status(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
   hid_t ds_id;
   H5D_space_status_t      space_status;
   char space_status_str[MAXBUFLEN];
-  herr_t err;
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &ds_id) != 0,	\
-	"Can't get dataset resource from argv");
+  check(enif_get_int(env, argv[0], &ds_id), "Can't get dataset resource from argv");
 
   // create a new file using default properties
-  err = H5Dget_space_status(ds_id, &space_status);
-  check(err == 0, "Failed to get space status.");
+  check(!H5Dget_space_status(ds_id, &space_status), "Failed to get space status.");
 
   // convert code to string representation
-  err = convert_space_status(space_status, space_status_str);
-  check(err == 0, "Failed to convert space status %d", space_status);
+  check(!convert_space_status(space_status, space_status_str), "Failed to convert space status %d", space_status);
 
   // make atom out of string representation
   ret = enif_make_atom(env, space_status_str);
