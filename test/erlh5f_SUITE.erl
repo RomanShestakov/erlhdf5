@@ -80,27 +80,27 @@ h5_lite_write_read(_Config) ->
     FileName = "hdf5_lt.h5",
     Rank = 2,
     DS_Name = "/dset_lt",
+    TestData = [1, 2, 3, 4, 5, 6, 7, 8],
 
     %% open new file
     {ok, File} = erlhdf5:h5fcreate(FileName, 'H5F_ACC_TRUNC'),
     %% create dataset with rank = 2
 
-    ok = erlhdf5:h5lt_make_dataset(File, DS_Name, Rank, {2, 3}, [1, 2, 3, 4, 5, 6]),
+    ok = erlhdf5:h5lt_make_dataset(File, DS_Name, Rank, {2, 4}, TestData),
     %% get dataset rank - should match to rank used in dataset creation
 
     {ok, Rank} = erlhdf5:h5ltget_dataset_ndims(File, DS_Name),
     ct:log("dataset rank : ~p ", [Rank]),
-    %% check ds info
 
+    %% check ds info
     {ok, DS_Info} = erlhdf5:h5ltget_dataset_info(File, DS_Name, Rank),
     ct:log("dataset info : ~p ", [DS_Info]),
-    %% read dataset
 
-    {ok, Data} = erlhdf5:h5lt_read_dataset_int(File, DS_Name),
-    ct:log("data : ~p ", [Data]),
-    %% {ok, Status1} = erlhdf5:h5d_get_space_status(DS),
-    %% {ok, Size1} = erlhdf5:h5d_get_storage_size(DS),
-    %% ct:log("dataset status : ~p ", [C]),
+    %% read dataset
+    {ok, TestData} = erlhdf5:h5lt_read_dataset_int(File, DS_Name),
+    ct:log("data : ~p ", [TestData]),
+
+    %% close file
     ok = erlhdf5:h5fclose(File),
     ok.
 
