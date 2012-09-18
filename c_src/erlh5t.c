@@ -54,11 +54,11 @@ ERL_NIF_TERM h5tcopy(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_atom(env, argv[0], type, sizeof(type), ERL_NIF_LATIN1) != 0, \
+  check(enif_get_atom(env, argv[0], type, sizeof(type), ERL_NIF_LATIN1), \
 	"Can't get type from argv");
 
   // convert type to format which hdf5 api understand
-  check(convert_type(type, &dtype_id) == 0, "Failed to convert type");
+  check(!convert_type(type, &dtype_id), "Failed to convert type");
 
   type_id = H5Tcopy(dtype_id);
   check(type_id > 0, "Failed to create type.");
@@ -75,17 +75,14 @@ ERL_NIF_TERM h5tcopy(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 // close
 ERL_NIF_TERM h5tclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-  herr_t err;
   hid_t type_id;
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &type_id) != 0,	\
-	"Can't get resource from argv");
+  check(enif_get_int(env, argv[0], &type_id), "Can't get resource from argv");
 
   // close properties list
-  err = H5Tclose(type_id);
-  check(err == 0, "Failed to close type.");
+  check(!H5Tclose(type_id), "Failed to close type.");
   return ATOM_OK;
 
  error:
@@ -102,8 +99,7 @@ ERL_NIF_TERM h5tget_class(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &type_id) != 0,	\
-	"Can't get resource from argv");
+  check(enif_get_int(env, argv[0], &type_id), "Can't get resource from argv");
 
   class_id = H5Tget_class(type_id);
   //fprintf(stderr, "class type: %d\r\n", class_id);
@@ -126,8 +122,7 @@ ERL_NIF_TERM h5tget_order(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &type_id) != 0,	\
-	"Can't get resource from argv");
+  check(enif_get_int(env, argv[0], &type_id), "Can't get resource from argv");
 
   order = H5Tget_order(type_id);
   check(order != H5T_ORDER_ERROR, "Failed to get order.");
@@ -149,8 +144,7 @@ ERL_NIF_TERM h5tget_size(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &type_id) != 0,	\
-	"Can't get resource from argv");
+  check(enif_get_int(env, argv[0], &type_id), "Can't get resource from argv");
 
   size = H5Tget_size(type_id);
   check(size > 0, "Failed to get size.");
