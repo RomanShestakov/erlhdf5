@@ -167,7 +167,7 @@ ERL_NIF_TERM h5d_get_storage_size(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &ds_id) != 0, "Can't get dataset resource from argv");
+  check(enif_get_int(env, argv[0], &ds_id), "Can't get dataset resource from argv");
 
   size = H5Dget_storage_size(ds_id);
   ret = enif_make_int64(env, size);
@@ -187,10 +187,8 @@ ERL_NIF_TERM h5dget_type(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &ds_id) != 0, "Can't get dataset resource from argv");
-
+  check(enif_get_int(env, argv[0], &ds_id), "Can't get dataset resource from argv");
   type_id = H5Dget_type(ds_id);
-
   ret = enif_make_int(env, type_id);
   return enif_make_tuple2(env, ATOM_OK, ret);
 
@@ -204,7 +202,6 @@ ERL_NIF_TERM h5dwrite(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   /* Handle* dataset_res; */
   hid_t dataset_id;
-  herr_t err;
   ERL_NIF_TERM list;
   unsigned int list_length;
   int arity;//, rank;
@@ -214,9 +211,7 @@ ERL_NIF_TERM h5dwrite(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
   // parse arguments
   check(argc == 2, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &dataset_id) != 0,	\
-	"Can't get dataset resource from argv");
-
+  check(enif_get_int(env, argv[0], &dataset_id), "Can't get dataset resource from argv");
   list = argv[1];
 
   // get the dimentions of list: lenght of list and arity of tuples (elements), all elements must be the same size
@@ -240,8 +235,7 @@ ERL_NIF_TERM h5dwrite(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   check(dataset_id, "Failed to get dataset handler");
 
   // write the data to the dataset
-  err = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
-  check(err == 0, "Failed to write into dataset.");
+  check(!H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data), "Failed to write into dataset.");
 
   // free mem
   freeArray(data, list_length);
@@ -270,8 +264,7 @@ ERL_NIF_TERM h5dget_space(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &dataset_id) != 0,	\
-	"Can't get dataset resource from argv");
+  check(enif_get_int(env, argv[0], &dataset_id), "Can't get dataset resource from argv");
 
   space_id = H5Dget_space(dataset_id);
   check(space_id >= 0, "Failed to get space.");
