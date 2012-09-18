@@ -61,13 +61,12 @@ ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
   // parse arguments
   check(argc == 2, "Incorrent number of arguments");
-  check(enif_get_string(env, argv[0], file_name, sizeof(file_name), ERL_NIF_LATIN1) != 0, \
-	"Can't get file name from argv");
-  check(enif_get_atom(env, argv[1], file_access_flags, sizeof(file_access_flags), ERL_NIF_LATIN1) != 0, \
+  check(enif_get_string(env, argv[0], file_name, sizeof(file_name), ERL_NIF_LATIN1), "Can't get file name from argv");
+  check(enif_get_atom(env, argv[1], file_access_flags, sizeof(file_access_flags), ERL_NIF_LATIN1), \
 	"Can't get file_access_flag from argv");
 
   // convert access flag to format which hdf5 api understand
-  check(convert_access_flag(file_access_flags, &flags) == 0, "Failed to convert access flag");
+  check(!convert_access_flag(file_access_flags, &flags), "Failed to convert access flag");
 
   // create a new file using default properties
   file_id = H5Fcreate(file_name, flags, H5P_DEFAULT, H5P_DEFAULT);
@@ -92,13 +91,13 @@ ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
   // parse arguments
   check(argc == 2, "Incorrent number of arguments");
-  check(enif_get_string(env, argv[0], file_name, sizeof(file_name), ERL_NIF_LATIN1) != 0, \
+  check(enif_get_string(env, argv[0], file_name, sizeof(file_name), ERL_NIF_LATIN1), \
 	"Can't get file name from argv");
-  check(enif_get_atom(env, argv[1], file_access_flags, sizeof(file_access_flags), ERL_NIF_LATIN1) != 0, \
+  check(enif_get_atom(env, argv[1], file_access_flags, sizeof(file_access_flags), ERL_NIF_LATIN1), \
 	"Can't get file_access_flag from argv");
 
   // convert access flag to format which hdf5 api understand
-  check(convert_access_flag(file_access_flags, &flags) == 0, "Failed to convert access flag");
+  check(!convert_access_flag(file_access_flags, &flags), "Failed to convert access flag");
 
   // create a new file using default properties
   file_id = H5Fopen(file_name, flags, H5P_DEFAULT);
@@ -112,20 +111,18 @@ ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   return error_tuple(env, "Can not open file");
 };
 
+
 // open file
 ERL_NIF_TERM h5fclose(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
-  herr_t err;
   hid_t file_id;
 
   // parse arguments
   check(argc == 1, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &file_id) != 0,	\
-	"Can't get resource from argv");
+  check(enif_get_int(env, argv[0], &file_id), "Can't get resource from argv");
 
   // close file
-  err = H5Fclose(file_id);
-  check(err == 0, "Failed to close file.");
+  check(!H5Fclose(file_id), "Failed to close file.");
   return ATOM_OK;
 
  error:
