@@ -47,6 +47,7 @@ typedef struct
 ERL_NIF_TERM error_tuple(ErlNifEnv* env, char* reason);
 int convert_array_to_nif_array(ErlNifEnv* env, hsize_t size, hsize_t *arr_from, ERL_NIF_TERM* arr_to);
 int convert_nif_to_hsize_array(ErlNifEnv* env, hsize_t size, const ERL_NIF_TERM* arr_from, hsize_t *arr_to);
+int convert_int_array_to_nif_array(ErlNifEnv* env, hsize_t size, int *arr_from, ERL_NIF_TERM* arr_to);
 
 ERL_NIF_TERM h5fcreate(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 ERL_NIF_TERM h5fopen(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);

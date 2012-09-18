@@ -35,6 +35,16 @@ int convert_array_to_nif_array(ErlNifEnv* env, hsize_t size, hsize_t *arr_from, 
   return 0;
 };
 
+int convert_int_array_to_nif_array(ErlNifEnv* env, hsize_t size, int *arr_from, ERL_NIF_TERM* arr_to)
+{
+  int i;
+  for(i = 0; i < size; i++) {
+    arr_to[i] = enif_make_int(env, arr_from[i]);
+  }
+  return 0;
+};
+
+
 int convert_nif_to_hsize_array(ErlNifEnv* env, hsize_t size, const ERL_NIF_TERM* arr_from, hsize_t *arr_to)
 {
   int n, i;

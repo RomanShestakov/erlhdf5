@@ -103,10 +103,9 @@ ERL_NIF_TERM h5lt_read_dataset_int(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
 {
   hid_t file_id;
   char ds_name[MAXBUFLEN];
-  herr_t err;
   int *data;
   ERL_NIF_TERM* data_arr;
-  size_t n_values = 1;
+  hsize_t n_values = 1;
   hsize_t *dims;
   int ndims;
   int i;
@@ -119,13 +118,11 @@ ERL_NIF_TERM h5lt_read_dataset_int(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
 	"Can't get dataset name from argv");
 
   // get dimensions
-  err = H5LTget_dataset_ndims(file_id, ds_name, &ndims);
-  check(err == 0, "Failed to determine dataspace dimensions.");
+  check(!H5LTget_dataset_ndims(file_id, ds_name, &ndims), "Failed to determine dataspace dimensions.");
 
   //get dataset info
   dims = malloc(ndims * sizeof(hsize_t));
-  err = H5LTget_dataset_info(file_id, ds_name, dims, NULL, NULL);
-  check(err == 0, "Failed to get info about dataset.");
+  check(!H5LTget_dataset_info(file_id, ds_name, dims, NULL, NULL), "Failed to get info about dataset.");
 
   // find out a number of values in the dataset
   for(i = 0; i < ndims; i++){
@@ -134,16 +131,13 @@ ERL_NIF_TERM h5lt_read_dataset_int(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
 
   // allocate space to hold dataset values
   data = malloc(n_values * sizeof(int));
-  data_arr = malloc(n_values * sizeof(ERL_NIF_TERM));
 
   // read a dataset
-  err = H5LTread_dataset_int(file_id, ds_name, data);
-  check(err == 0, "Failed to read dataset.");
+  check(!H5LTread_dataset_int(file_id, ds_name, data), "Failed to read dataset.");
 
-  // convert into array of ERL_NIF_TERM
-  for(i = 0; i < n_values; i++){
-    data_arr[i] = enif_make_int(env, data[i]);
-  }
+  // convert array of ints into nif
+  data_arr = (ERL_NIF_TERM*)enif_alloc(sizeof(ERL_NIF_TERM) * n_values);
+  check(!convert_int_array_to_nif_array(env, n_values, data, data_arr), "can't convert array to nif");
 
   // make a list of ERL_NIF_TERM to return to the caller
   ret = enif_make_list_from_array(env, data_arr, n_values);
@@ -151,14 +145,12 @@ ERL_NIF_TERM h5lt_read_dataset_int(ErlNifEnv* env, int argc, const ERL_NIF_TERM 
   // cleanup
   free(dims);
   free(data);
-  free(data_arr);
 
   return enif_make_tuple2(env, ATOM_OK, ret);
 
  error:
   if(dims) free(dims);
   if(data) free(data);
-  if(data_arr) free(data_arr);
   return error_tuple(env, "Can not read dataset");
 };
 
@@ -191,28 +183,26 @@ ERL_NIF_TERM h5ltget_dataset_info(ErlNifEnv* env, int argc, const ERL_NIF_TERM a
   hid_t file_id;
   hsize_t *dims;
   char ds_name[MAXBUFLEN];
-  herr_t err;
   ERL_NIF_TERM dims_list;
   ERL_NIF_TERM* dims_arr;
   int rank;
 
   // parse arguments
   check(argc == 3, "Incorrent number of arguments");
-  check(enif_get_int(env, argv[0], &file_id) != 0,	"Can't get resource from argv");
-  check(enif_get_string(env, argv[1], ds_name, sizeof(ds_name), ERL_NIF_LATIN1) != 0, \
-	"Can't get dataset name from argv");
-  check(enif_get_int(env, argv[2], &rank) != 0,	"Can't get rank from argv");
+  check(enif_get_int(env, argv[0], &file_id), "Can't get resource from argv");
+  check(enif_get_string(env, argv[1], ds_name, sizeof(ds_name), ERL_NIF_LATIN1), "Can't get dataset name from argv");
+  check(enif_get_int(env, argv[2], &rank), "Can't get rank from argv");
 
   // allocate mem for dims array
   dims = malloc(rank * sizeof(hsize_t));
-
-  err = H5LTget_dataset_info(file_id, ds_name, dims, NULL, NULL);
-  check(err == 0, "Failed to get info about dataset.");
+  check(!H5LTget_dataset_info(file_id, ds_name, dims, NULL, NULL), "Failed to get info about dataset.");
 
   // allocate mem for arrays of ERL_NIF_TERM so we could convert
   dims_arr = (ERL_NIF_TERM*)enif_alloc(sizeof(ERL_NIF_TERM) * rank);
+
   // convert arrays into array of ERL_NIF_TERM
-  err = convert_array_to_nif_array(env, rank, dims, dims_arr);
+  check(!convert_array_to_nif_array(env, rank, dims, dims_arr), "can't convert array to nif");
+
    // convert arrays to list
   dims_list = enif_make_list_from_array(env, dims_arr, rank);
 
