@@ -1,6 +1,12 @@
 DEPS=./deps
 HDF5_VERSION := $(shell curl http://www.hdfgroup.org/ftp/HDF5/current/src/ | grep '<title>.*</title>' | awk '{print $$2}')
 HDF5_FLAGS=
+CC:=
+DRV_CC_TEMPLATE:=
+DRV_LINK_TEMPLATE:=
+EXE_LINK_TEMPLATE:=
+EXE_CC_TEMPLATE:=
+LDFLAGS:=
 
 TEST_SUPPORT = \
 	test/etap.beam
@@ -10,6 +16,8 @@ TEST_SUPPORT = \
 
 all:$(DEPS)/hdf5/lib/libhdf5.so
 	./rebar compile
+
+hdf5: $(DEPS)/hdf5/lib/libhdf5.so
 
 $(DEPS)/hdf5:
 	@mkdir -p $(DEPS)/hdf5; cd $(DEPS) ; \
