@@ -1,5 +1,6 @@
 Erlhdf5
 ============
+[![Build Status](https://secure.travis-ci.org/bkearns/erlhdf5.png)](http://travis-ci.org/bkearns/erlhdf5)
 
 This is the binding from erlang to HDF5 and is fork of RomanShestakov/erlhdf5's original.
 
