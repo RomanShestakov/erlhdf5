@@ -1,3 +1,4 @@
+OS:=$(shell uname -s)
 DEPS=./deps
 HDF5_VERSION := $(shell curl http://www.hdfgroup.org/ftp/HDF5/current/src/ | grep '<title>.*</title>' | awk '{print $$2}')
 HDF5_FLAGS=
@@ -7,6 +8,11 @@ DRV_LINK_TEMPLATE:=
 EXE_LINK_TEMPLATE:=
 EXE_CC_TEMPLATE:=
 LDFLAGS:=
+ifeq ($(OS),Darwin)
+LIBRARY=$(DEPS)/hdf5/lib/libhdf5.dylib
+else
+LIBRARY=$(DEPS)/hdf5/lib/libhdf5.so
+endif
 
 TEST_SUPPORT = \
 	test/etap.beam
@@ -14,16 +20,16 @@ TEST_SUPPORT = \
 %.beam: %.erl
 	erlc -o test/ $<
 
-all:$(DEPS)/hdf5/lib/libhdf5.so
+all:$(LIBRARY)
 	./rebar compile
 
-hdf5: $(DEPS)/hdf5/lib/libhdf5.so
+hdf5: $(LIBRARY)
 
 $(DEPS)/hdf5:
 	@mkdir -p $(DEPS)/hdf5; cd $(DEPS) ; \
 	curl http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-$(HDF5_VERSION).tar.gz | tar xzf -
 
-$(DEPS)/hdf5/lib/libhdf5.so: $(DEPS)/hdf5
+$(LIBRARY): $(DEPS)/hdf5
 	@cd $(DEPS)/hdf5-$(HDF5_VERSION) && CFLAGS=-O1 ./configure --prefix $(CURDIR)/$(DEPS)/hdf5  \
 	$(HDF5_FLAGS) && make && make install
 
