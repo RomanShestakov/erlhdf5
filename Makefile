@@ -1,3 +1,4 @@
+OS:=$(shell uname -s)
 DEPS=./deps
 ARCH:= $(shell uname -p)
 HDF5_VERSION := $(shell curl http://www.hdfgroup.org/ftp/HDF5/current/src/ | grep '<title>.*</title>' | awk '{print $$2}')
@@ -10,6 +11,11 @@ DRV_LINK_TEMPLATE:=
 EXE_LINK_TEMPLATE:=
 EXE_CC_TEMPLATE:=
 LDFLAGS:=
+ifeq ($(OS),Darwin)
+LIBRARY=$(DEPS)/hdf5/lib/libhdf5.dylib
+else
+LIBRARY=$(DEPS)/hdf5/lib/libhdf5.so
+endif
 
 ifeq ($(ARCH), armv7l)
 ERLCFLAGS := -g -Wall -fPIC  -I/usr/lib/erlang/lib/erl_interface-3.7.3/include -I/usr/lib/erlang/erts-5.8.3/include -DH5_NO_DEPRECATED_SYMBOLS
@@ -25,10 +31,10 @@ TEST_SUPPORT = \
 %.beam: %.erl
 	erlc -o test/ $<
 
-all:$(DEPS)/hdf5/lib/libhdf5.so
+all:$(LIBRARY)
 	CC=$(H5CC) CFLAGS="$(ERLCFLAGS)" ./rebar compile
 
-hdf5: $(DEPS)/hdf5/lib/libhdf5.so
+hdf5: $(LIBRARY)
 
 $(DEPS)/hdf5:
 ifneq ($(H5CCBASE), gcc)
@@ -38,9 +44,10 @@ else
 	@mkdir -p $(DEPS)/hdf5; cd $(DEPS) ; 
 endif
 
-$(DEPS)/hdf5/lib/libhdf5.so: $(DEPS)/hdf5
+
+$(LIBRARY): $(DEPS)/hdf5
 ifneq ($(H5CCBASE), gcc)
-	cd $(DEPS)/hdf5-$(HDF5_VERSION) && CFLAGS=-O1 ./configure --prefix $(CURDIR)/$(DEPS)/hdf5  \
+	@cd $(DEPS)/hdf5-$(HDF5_VERSION) && CFLAGS=-O1 ./configure --prefix $(CURDIR)/$(DEPS)/hdf5  \
 	$(HDF5_FLAGS) && make && make install
 endif
 
