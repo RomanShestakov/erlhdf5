@@ -18,7 +18,7 @@ LIBRARY=$(DEPS)/hdf5/lib/libhdf5.so
 endif
 
 ifeq ($(ARCH), armv7l)
-ERLCFLAGS := -g -Wall -fPIC  -I/usr/lib/erlang/lib/erl_interface-3.7.3/include -I/usr/lib/erlang/erts-5.8.3/include -DH5_NO_DEPRECATED_SYMBOLS
+ERLCFLAGS := "-g -Wall -fPIC  -I/usr/lib/erlang/lib/erl_interface-3.7.3/include -I/usr/lib/erlang/erts-5.8.3/include -DH5_NO_DEPRECATED_SYMBOLS"
 H5CCBASE := $(shell h5cc --version| head -1| awk '{print $$1}')
 H5CC := $(shell which h5cc)
 else
