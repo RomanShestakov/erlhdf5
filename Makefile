@@ -1,12 +1,23 @@
 DEPS=./deps
+ARCH:= $(shell uname -p)
 HDF5_VERSION := $(shell curl http://www.hdfgroup.org/ftp/HDF5/current/src/ | grep '<title>.*</title>' | awk '{print $$2}')
 HDF5_FLAGS=
 CC:=
+
+H5CC := $(shell which h5cc)
 DRV_CC_TEMPLATE:=
 DRV_LINK_TEMPLATE:=
 EXE_LINK_TEMPLATE:=
 EXE_CC_TEMPLATE:=
 LDFLAGS:=
+
+ifeq ($(ARCH), armv7l)
+ERLCFLAGS := -g -Wall -fPIC  -I/usr/lib/erlang/lib/erl_interface-3.7.3/include -I/usr/lib/erlang/erts-5.8.3/include -DH5_NO_DEPRECATED_SYMBOLS
+else
+ERLCFLAGS := -g -Wall -fPIC  -I/usr/lib/erlang/lib/erl_interface-3.7.9/include -I/usr/lib/erlang/erts-5.9.3.1/include
+endif
+
+H5CCBASE := $(shell h5cc --version| head -1| awk '{print $$1}')
 
 TEST_SUPPORT = \
 	test/etap.beam
@@ -15,17 +26,23 @@ TEST_SUPPORT = \
 	erlc -o test/ $<
 
 all:$(DEPS)/hdf5/lib/libhdf5.so
-	./rebar compile
+	CC=$(H5CC) CFLAGS="$(ERLCFLAGS)" ./rebar compile
 
 hdf5: $(DEPS)/hdf5/lib/libhdf5.so
 
 $(DEPS)/hdf5:
+ifneq ($(H5CCBASE), gcc)
 	@mkdir -p $(DEPS)/hdf5; cd $(DEPS) ; \
 	curl http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-$(HDF5_VERSION).tar.gz | tar xzf -
+else
+	@mkdir -p $(DEPS)/hdf5; cd $(DEPS) ; 
+endif
 
 $(DEPS)/hdf5/lib/libhdf5.so: $(DEPS)/hdf5
-	@cd $(DEPS)/hdf5-$(HDF5_VERSION) && CFLAGS=-O1 ./configure --prefix $(CURDIR)/$(DEPS)/hdf5  \
+ifneq ($(H5CCBASE), gcc)
+	cd $(DEPS)/hdf5-$(HDF5_VERSION) && CFLAGS=-O1 ./configure --prefix $(CURDIR)/$(DEPS)/hdf5  \
 	$(HDF5_FLAGS) && make && make install
+endif
 
 # check: $(TEST_SUPPORT)
 # 	prove test/*.t
@@ -34,7 +51,7 @@ etags:
 	find . | grep ".*\.\(h\|hxx\|c\)" | xargs etags -f TAGS
 
 clean:
-	rebar clean
+	./rebar clean
 	rm -rf test/*.beam
 
 distclean:
