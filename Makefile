@@ -5,12 +5,12 @@ HDF5_VERSION := $(shell curl http://www.hdfgroup.org/ftp/HDF5/current/src/ | gre
 HDF5_FLAGS=
 CC:=
 
-H5CC := $(shell which h5cc)
 DRV_CC_TEMPLATE:=
 DRV_LINK_TEMPLATE:=
 EXE_LINK_TEMPLATE:=
 EXE_CC_TEMPLATE:=
 LDFLAGS:=
+
 ifeq ($(OS),Darwin)
 LIBRARY=$(DEPS)/hdf5/lib/libhdf5.dylib
 else
@@ -19,11 +19,13 @@ endif
 
 ifeq ($(ARCH), armv7l)
 ERLCFLAGS := -g -Wall -fPIC  -I/usr/lib/erlang/lib/erl_interface-3.7.3/include -I/usr/lib/erlang/erts-5.8.3/include -DH5_NO_DEPRECATED_SYMBOLS
-else
-ERLCFLAGS := -g -Wall -fPIC  -I/usr/lib/erlang/lib/erl_interface-3.7.9/include -I/usr/lib/erlang/erts-5.9.3.1/include
-endif
-
 H5CCBASE := $(shell h5cc --version| head -1| awk '{print $$1}')
+H5CC := $(shell which h5cc)
+else
+ERLCFLAGS := "-g -Wall -fPIC  -I/usr/lib/erlang/lib/erl_interface-3.7.9/include -I/usr/lib/erlang/erts-5.9.3.1/include"
+H5CCBASE :=
+H5CC:=deps/hdf5/bin/h5cc
+endif
 
 TEST_SUPPORT = \
 	test/etap.beam
@@ -32,7 +34,7 @@ TEST_SUPPORT = \
 	erlc -o test/ $<
 
 all:$(LIBRARY)
-	CC=$(H5CC) CFLAGS="$(ERLCFLAGS)" ./rebar compile
+	CC=$(H5CC) CFLAGS=$(ERLCFLAGS) ./rebar compile
 
 hdf5: $(LIBRARY)
 
